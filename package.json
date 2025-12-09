@@ -1,0 +1,24 @@
+{
+  "name": "kaelyn-math",
+  "version": "1.0.0",
+  "description": "Interactive math tutorials for Kaelyn - Learn numbers, addition, subtraction, multiplication and division",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "math",
+    "education",
+    "children",
+    "learning"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
