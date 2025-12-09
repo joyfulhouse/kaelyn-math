@@ -4,399 +4,489 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kaelyn's Math Adventure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="stars-container" id="stars"></div>
+    <!-- Floating decorative shapes -->
+    <div class="floating-shapes" aria-hidden="true">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+    </div>
 
-    <header>
-        <div class="header-stats">
-            <div class="star-counter">
-                <span class="star-icon">⭐</span>
-                <span id="total-stars-display">0</span>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="30" cy="30" r="28" fill="#FF7F6B"/>
+                        <path d="M20 25L30 15L40 25L30 35L20 25Z" fill="#FFF8F0"/>
+                        <circle cx="30" cy="38" r="8" fill="#FFD93D"/>
+                        <circle cx="30" cy="38" r="4" fill="#4A3728"/>
+                    </svg>
+                </div>
+                <h1 class="site-title">Kaelyn's Math Adventure</h1>
+            </div>
+            <div class="star-badge">
+                <svg class="star-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFD93D" stroke="#E5B800" stroke-width="1"/>
+                </svg>
+                <span id="total-stars-display" class="star-count">0</span>
             </div>
         </div>
-        <h1 class="main-title">
-            <span class="letter" style="--delay: 0">K</span>
-            <span class="letter" style="--delay: 1">a</span>
-            <span class="letter" style="--delay: 2">e</span>
-            <span class="letter" style="--delay: 3">l</span>
-            <span class="letter" style="--delay: 4">y</span>
-            <span class="letter" style="--delay: 5">n</span>
-            <span class="letter" style="--delay: 6">'</span>
-            <span class="letter" style="--delay: 7">s</span>
-            <span class="letter space" style="--delay: 8">&nbsp;</span>
-            <span class="letter" style="--delay: 9">M</span>
-            <span class="letter" style="--delay: 10">a</span>
-            <span class="letter" style="--delay: 11">t</span>
-            <span class="letter" style="--delay: 12">h</span>
-            <span class="letter space" style="--delay: 13">&nbsp;</span>
-            <span class="letter" style="--delay: 14">A</span>
-            <span class="letter" style="--delay: 15">d</span>
-            <span class="letter" style="--delay: 16">v</span>
-            <span class="letter" style="--delay: 17">e</span>
-            <span class="letter" style="--delay: 18">n</span>
-            <span class="letter" style="--delay: 19">t</span>
-            <span class="letter" style="--delay: 20">u</span>
-            <span class="letter" style="--delay: 21">r</span>
-            <span class="letter" style="--delay: 22">e</span>
-        </h1>
     </header>
 
+    <!-- Navigation -->
     <nav class="main-nav">
-        <button class="nav-btn active" data-section="home" onclick="showSection('home')">
-            <span class="nav-icon">🏠</span>
-            <span class="nav-text">Home</span>
-        </button>
-        <button class="nav-btn" data-section="number-places" onclick="showSection('number-places')">
-            <span class="nav-icon">🔢</span>
-            <span class="nav-text">Number Places</span>
-        </button>
-        <button class="nav-btn" data-section="stacked-math" onclick="showSection('stacked-math')">
-            <span class="nav-icon">📚</span>
-            <span class="nav-text">Stacked Math</span>
-        </button>
-        <button class="nav-btn" data-section="multiplication" onclick="showSection('multiplication')">
-            <span class="nav-icon">✖️</span>
-            <span class="nav-text">Multiplication</span>
-        </button>
-        <button class="nav-btn" data-section="division" onclick="showSection('division')">
-            <span class="nav-icon">➗</span>
-            <span class="nav-text">Division</span>
-        </button>
-        <button class="nav-btn" data-section="carry-over" onclick="showSection('carry-over')">
-            <span class="nav-icon">📤</span>
-            <span class="nav-text">Carrying</span>
-        </button>
-        <button class="nav-btn" data-section="borrowing" onclick="showSection('borrowing')">
-            <span class="nav-icon">📥</span>
-            <span class="nav-text">Borrowing</span>
-        </button>
-        <button class="nav-btn" data-section="practice" onclick="showSection('practice')">
-            <span class="nav-icon">🎯</span>
-            <span class="nav-text">Practice</span>
-        </button>
+        <div class="nav-scroll">
+            <button class="nav-pill active" data-section="home" onclick="showSection('home')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12L12 3L21 12V21H15V15H9V21H3V12Z"/>
+                </svg>
+                <span>Home</span>
+            </button>
+            <button class="nav-pill" data-section="number-places" onclick="showSection('number-places')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                <span>Places</span>
+            </button>
+            <button class="nav-pill" data-section="stacked-math" onclick="showSection('stacked-math')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="4" width="16" height="4" rx="1"/>
+                    <rect x="4" y="10" width="16" height="4" rx="1"/>
+                    <rect x="4" y="16" width="16" height="4" rx="1"/>
+                </svg>
+                <span>Stack</span>
+            </button>
+            <button class="nav-pill" data-section="carry-over" onclick="showSection('carry-over')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 19V5M12 5L5 12M12 5L19 12"/>
+                </svg>
+                <span>Carry</span>
+            </button>
+            <button class="nav-pill" data-section="borrowing" onclick="showSection('borrowing')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5V19M12 19L5 12M12 19L19 12"/>
+                </svg>
+                <span>Borrow</span>
+            </button>
+            <button class="nav-pill" data-section="multiplication" onclick="showSection('multiplication')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6L18 18"/>
+                </svg>
+                <span>Multiply</span>
+            </button>
+            <button class="nav-pill" data-section="division" onclick="showSection('division')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="6" r="2"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <circle cx="12" cy="18" r="2"/>
+                </svg>
+                <span>Divide</span>
+            </button>
+            <button class="nav-pill" data-section="practice" onclick="showSection('practice')">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="6"/>
+                    <circle cx="12" cy="12" r="2"/>
+                </svg>
+                <span>Practice</span>
+            </button>
+        </div>
     </nav>
 
-    <main class="container">
+    <!-- Main Content -->
+    <main class="main-content">
         <!-- Home Section -->
         <section id="home" class="section active">
-            <div class="welcome-card">
-                <h2>Welcome, Kaelyn! 🌟</h2>
-                <p>Ready to learn some amazing math? Choose what you'd like to explore today!</p>
-
-                <div class="feature-grid">
-                    <div class="feature-card" onclick="showSection('number-places')">
-                        <div class="feature-icon bounce">🔢</div>
-                        <h3>Number Places</h3>
-                        <p>Learn about ones, tens, hundreds, and thousands!</p>
-                    </div>
-                    <div class="feature-card" onclick="showSection('stacked-math')">
-                        <div class="feature-icon bounce">📚</div>
-                        <h3>Stacked Math</h3>
-                        <p>Add and subtract big numbers in columns!</p>
-                    </div>
-                    <div class="feature-card" onclick="showSection('multiplication')">
-                        <div class="feature-icon bounce">✖️</div>
-                        <h3>Multiplication</h3>
-                        <p>Discover the magic of multiplication!</p>
-                    </div>
-                    <div class="feature-card" onclick="showSection('division')">
-                        <div class="feature-icon bounce">➗</div>
-                        <h3>Division</h3>
-                        <p>Learn how to share numbers equally!</p>
-                    </div>
-                    <div class="feature-card" onclick="showSection('carry-over')">
-                        <div class="feature-icon bounce">📤</div>
-                        <h3>Carrying</h3>
-                        <p>Learn to carry over when adding big numbers!</p>
-                    </div>
-                    <div class="feature-card" onclick="showSection('borrowing')">
-                        <div class="feature-icon bounce">📥</div>
-                        <h3>Borrowing</h3>
-                        <p>Learn to borrow when subtracting numbers!</p>
-                    </div>
+            <div class="hero-card">
+                <div class="hero-illustration">
+                    <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="100" cy="145" rx="80" ry="10" fill="#E8DDD4"/>
+                        <rect x="60" y="80" width="80" height="60" rx="8" fill="#8FBC8F"/>
+                        <rect x="65" y="85" width="70" height="45" rx="4" fill="#F5F5F5"/>
+                        <text x="100" y="115" text-anchor="middle" font-family="Fredoka" font-size="24" fill="#4A3728">2+2=4</text>
+                        <circle cx="50" cy="60" r="25" fill="#FF7F6B"/>
+                        <circle cx="50" cy="55" r="8" fill="#FFF8F0"/>
+                        <circle cx="46" cy="53" r="3" fill="#4A3728"/>
+                        <circle cx="54" cy="53" r="3" fill="#4A3728"/>
+                        <path d="M45 62Q50 68 55 62" stroke="#4A3728" stroke-width="2" fill="none"/>
+                        <circle cx="150" cy="50" r="20" fill="#FFD93D"/>
+                        <path d="M150 35L152 42L160 42L154 47L156 54L150 49L144 54L146 47L140 42L148 42Z" fill="#FFF8F0"/>
+                    </svg>
                 </div>
-
-                <div class="progress-section">
-                    <h3>Your Progress</h3>
-                    <div id="progress-stats" class="progress-stats">
-                        <div class="stat-item">
-                            <span class="stat-value">0</span>
-                            <span class="stat-label">Sessions</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value">0</span>
-                            <span class="stat-label">Problems</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value">0%</span>
-                            <span class="stat-label">Accuracy</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value">0%</span>
-                            <span class="stat-label">Best Score</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="quick-practice">
-                    <h3>Quick Practice</h3>
-                    <p>Want to practice what you already know?</p>
-                    <button class="btn btn-primary btn-large" onclick="showSection('practice')">
-                        Start Practicing! 🚀
-                    </button>
+                <div class="hero-content">
+                    <h2 class="hero-title">Welcome, <span id="user-name-display">Kaelyn</span>!</h2>
+                    <p class="hero-subtitle">Ready for a math adventure? Pick a topic below and let's learn together!</p>
                 </div>
             </div>
+
+            <div class="module-grid">
+                <button class="module-card module-places" onclick="showSection('number-places')">
+                    <div class="module-icon">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="4" y="4" width="16" height="16" rx="4" fill="#FF7F6B"/>
+                            <rect x="28" y="4" width="16" height="16" rx="4" fill="#8FBC8F"/>
+                            <rect x="4" y="28" width="16" height="16" rx="4" fill="#FFD93D"/>
+                            <rect x="28" y="28" width="16" height="16" rx="4" fill="#7EB5D6"/>
+                            <text x="12" y="17" text-anchor="middle" font-family="Fredoka" font-size="12" fill="white">1</text>
+                            <text x="36" y="17" text-anchor="middle" font-family="Fredoka" font-size="12" fill="white">0</text>
+                            <text x="12" y="41" text-anchor="middle" font-family="Fredoka" font-size="12" fill="white">0</text>
+                            <text x="36" y="41" text-anchor="middle" font-family="Fredoka" font-size="12" fill="white">0</text>
+                        </svg>
+                    </div>
+                    <h3>Number Places</h3>
+                    <p>Learn ones, tens, hundreds!</p>
+                </button>
+
+                <button class="module-card module-stack" onclick="showSection('stacked-math')">
+                    <div class="module-icon">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="8" y="8" width="32" height="10" rx="3" fill="#8FBC8F"/>
+                            <rect x="8" y="22" width="32" height="10" rx="3" fill="#7EB5D6"/>
+                            <line x1="8" y1="36" x2="40" y2="36" stroke="#4A3728" stroke-width="3"/>
+                            <text x="24" y="16" text-anchor="middle" font-family="Fredoka" font-size="8" fill="white">245</text>
+                            <text x="24" y="30" text-anchor="middle" font-family="Fredoka" font-size="8" fill="white">+132</text>
+                        </svg>
+                    </div>
+                    <h3>Stacked Math</h3>
+                    <p>Add & subtract in columns!</p>
+                </button>
+
+                <button class="module-card module-carry" onclick="showSection('carry-over')">
+                    <div class="module-icon">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="8" y="20" width="32" height="20" rx="4" fill="#7EB5D6"/>
+                            <circle cx="32" cy="12" r="8" fill="#FF7F6B"/>
+                            <text x="32" y="16" text-anchor="middle" font-family="Fredoka" font-size="10" fill="white">1</text>
+                            <path d="M28 20L32 12L36 20" stroke="#FF7F6B" stroke-width="2" fill="none" stroke-dasharray="2 2"/>
+                            <text x="24" y="34" text-anchor="middle" font-family="Fredoka" font-size="8" fill="white">carry!</text>
+                        </svg>
+                    </div>
+                    <h3>Carrying</h3>
+                    <p>When digits get too big!</p>
+                </button>
+
+                <button class="module-card module-borrow" onclick="showSection('borrowing')">
+                    <div class="module-icon">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="8" y="8" width="32" height="20" rx="4" fill="#8FBC8F"/>
+                            <circle cx="32" cy="38" r="8" fill="#FFD93D"/>
+                            <text x="32" y="42" text-anchor="middle" font-family="Fredoka" font-size="10" fill="#4A3728">10</text>
+                            <path d="M28 28L32 38L36 28" stroke="#FFD93D" stroke-width="2" fill="none" stroke-dasharray="2 2"/>
+                            <text x="20" y="22" text-anchor="middle" font-family="Fredoka" font-size="8" fill="white">borrow</text>
+                        </svg>
+                    </div>
+                    <h3>Borrowing</h3>
+                    <p>When we need more!</p>
+                </button>
+
+                <button class="module-card module-multiply" onclick="showSection('multiplication')">
+                    <div class="module-icon">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="6" fill="#FF7F6B"/>
+                            <circle cx="24" cy="12" r="6" fill="#FF7F6B"/>
+                            <circle cx="36" cy="12" r="6" fill="#FF7F6B"/>
+                            <circle cx="12" cy="24" r="6" fill="#FF7F6B"/>
+                            <circle cx="24" cy="24" r="6" fill="#FF7F6B"/>
+                            <circle cx="36" cy="24" r="6" fill="#FF7F6B"/>
+                            <text x="24" y="42" text-anchor="middle" font-family="Fredoka" font-size="10" fill="#4A3728">3×2=6</text>
+                        </svg>
+                    </div>
+                    <h3>Multiplication</h3>
+                    <p>Groups and times tables!</p>
+                </button>
+
+                <button class="module-card module-divide" onclick="showSection('division')">
+                    <div class="module-icon">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="10" cy="24" r="6" fill="#FFD93D"/>
+                            <circle cx="24" cy="24" r="6" fill="#FFD93D"/>
+                            <circle cx="38" cy="24" r="6" fill="#FFD93D"/>
+                            <rect x="6" y="10" width="12" height="2" rx="1" fill="#8FBC8F"/>
+                            <rect x="20" y="10" width="12" height="2" rx="1" fill="#8FBC8F"/>
+                            <rect x="34" y="10" width="12" height="2" rx="1" fill="#8FBC8F"/>
+                            <text x="24" y="42" text-anchor="middle" font-family="Fredoka" font-size="10" fill="#4A3728">12÷3=4</text>
+                        </svg>
+                    </div>
+                    <h3>Division</h3>
+                    <p>Share things equally!</p>
+                </button>
+            </div>
+
+            <div class="stats-strip">
+                <div class="stat-bubble">
+                    <span class="stat-number" id="stat-sessions">0</span>
+                    <span class="stat-label">Sessions</span>
+                </div>
+                <div class="stat-bubble">
+                    <span class="stat-number" id="stat-problems">0</span>
+                    <span class="stat-label">Problems</span>
+                </div>
+                <div class="stat-bubble">
+                    <span class="stat-number" id="stat-accuracy">0%</span>
+                    <span class="stat-label">Accuracy</span>
+                </div>
+                <div class="stat-bubble accent">
+                    <span class="stat-number" id="stat-best">0%</span>
+                    <span class="stat-label">Best Score</span>
+                </div>
+            </div>
+
+            <button class="practice-cta" onclick="showSection('practice')">
+                <span>Start Practice Mode</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12H19M19 12L12 5M19 12L12 19"/>
+                </svg>
+            </button>
         </section>
 
         <!-- Number Places Section -->
         <section id="number-places" class="section">
-            <div class="module-card">
-                <h2>🔢 Number Places</h2>
-                <p class="intro-text">Every digit in a number has its own special place! Let's learn where each one belongs.</p>
+            <div class="section-header">
+                <h2>Number Places</h2>
+                <p>Every digit has its own special spot!</p>
+            </div>
 
-                <div class="place-value-visual">
-                    <div class="pv-column thousands">
-                        <div class="pv-label">Thousands</div>
-                        <div class="pv-box" id="pv-thousands">0</div>
-                        <div class="pv-example">1000s</div>
-                    </div>
-                    <div class="pv-column hundreds">
-                        <div class="pv-label">Hundreds</div>
-                        <div class="pv-box" id="pv-hundreds">0</div>
-                        <div class="pv-example">100s</div>
-                    </div>
-                    <div class="pv-column tens">
-                        <div class="pv-label">Tens</div>
-                        <div class="pv-box" id="pv-tens">0</div>
-                        <div class="pv-example">10s</div>
-                    </div>
-                    <div class="pv-column ones">
-                        <div class="pv-label">Ones</div>
-                        <div class="pv-box" id="pv-ones">0</div>
-                        <div class="pv-example">1s</div>
-                    </div>
+            <div class="place-value-display">
+                <div class="pv-column thousands">
+                    <div class="pv-label">Thousands</div>
+                    <div class="pv-box" id="pv-thousands">0</div>
+                    <div class="pv-hint">×1000</div>
                 </div>
+                <div class="pv-column hundreds">
+                    <div class="pv-label">Hundreds</div>
+                    <div class="pv-box" id="pv-hundreds">0</div>
+                    <div class="pv-hint">×100</div>
+                </div>
+                <div class="pv-column tens">
+                    <div class="pv-label">Tens</div>
+                    <div class="pv-box" id="pv-tens">0</div>
+                    <div class="pv-hint">×10</div>
+                </div>
+                <div class="pv-column ones">
+                    <div class="pv-label">Ones</div>
+                    <div class="pv-box" id="pv-ones">0</div>
+                    <div class="pv-hint">×1</div>
+                </div>
+            </div>
 
-                <div class="number-input-area">
-                    <label for="pv-input">Type a number to see its places:</label>
-                    <input type="number" id="pv-input" min="0" max="9999" value="0" oninput="updatePlaceValues()">
-                    <button class="btn btn-secondary" onclick="randomPlaceValue()">Random Number</button>
-                </div>
+            <div class="input-row">
+                <label for="pv-input" class="sr-only">Enter a number</label>
+                <input type="number" id="pv-input" min="0" max="9999" value="0" oninput="updatePlaceValues()" placeholder="Type a number...">
+                <button class="btn btn-secondary" onclick="randomPlaceValue()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>
+                    </svg>
+                    Random
+                </button>
+            </div>
 
-                <div class="pv-breakdown" id="pv-breakdown">
-                    <p>The number <strong>0</strong> has:</p>
-                    <ul>
-                        <li><span class="highlight thousands">0</span> thousands (0 × 1000 = 0)</li>
-                        <li><span class="highlight hundreds">0</span> hundreds (0 × 100 = 0)</li>
-                        <li><span class="highlight tens">0</span> tens (0 × 10 = 0)</li>
-                        <li><span class="highlight ones">0</span> ones (0 × 1 = 0)</li>
-                    </ul>
-                </div>
+            <div class="breakdown-card" id="pv-breakdown">
+                <p>The number <strong>0</strong> has:</p>
+                <ul>
+                    <li><span class="chip thousands">0</span> thousands (0 × 1000 = 0)</li>
+                    <li><span class="chip hundreds">0</span> hundreds (0 × 100 = 0)</li>
+                    <li><span class="chip tens">0</span> tens (0 × 10 = 0)</li>
+                    <li><span class="chip ones">0</span> ones (0 × 1 = 0)</li>
+                </ul>
+            </div>
 
-                <div class="blocks-visual" id="blocks-visual">
-                    <!-- Visual blocks will be generated here -->
-                </div>
+            <div class="blocks-visual" id="blocks-visual"></div>
 
-                <div class="pv-quiz">
-                    <h3>🎮 Place Value Quiz</h3>
-                    <div id="pv-quiz-area">
-                        <p class="quiz-question" id="pv-question">Click "New Question" to start!</p>
-                        <div class="quiz-options" id="pv-options"></div>
-                        <button class="btn btn-primary" onclick="newPlaceValueQuestion()">New Question</button>
-                        <div class="feedback" id="pv-feedback"></div>
-                    </div>
-                </div>
+            <div class="quiz-card">
+                <h3>Quiz Time!</h3>
+                <p class="quiz-question" id="pv-question">Click "New Question" to start!</p>
+                <div class="quiz-options" id="pv-options"></div>
+                <button class="btn btn-primary" onclick="newPlaceValueQuestion()">New Question</button>
+                <div class="feedback" id="pv-feedback"></div>
             </div>
         </section>
 
         <!-- Stacked Math Section -->
         <section id="stacked-math" class="section">
-            <div class="module-card">
-                <h2>📚 Stacked Addition & Subtraction</h2>
-                <p class="intro-text">Learn to add and subtract bigger numbers by stacking them!</p>
+            <div class="section-header">
+                <h2>Stacked Math</h2>
+                <p>Add and subtract bigger numbers in columns!</p>
+            </div>
 
-                <div class="stacked-tabs">
-                    <button class="tab-btn active" onclick="switchStackedTab('addition')">Addition</button>
-                    <button class="tab-btn" onclick="switchStackedTab('subtraction')">Subtraction</button>
-                </div>
+            <div class="tab-row">
+                <button class="tab-btn active" onclick="switchStackedTab('addition')">Addition</button>
+                <button class="tab-btn" onclick="switchStackedTab('subtraction')">Subtraction</button>
+            </div>
 
-                <div class="stacked-content">
-                    <div class="stacked-demo">
-                        <h3>How it works:</h3>
-                        <div class="demo-steps" id="demo-steps">
-                            <p>Line up the numbers by their place values, then add or subtract each column from right to left!</p>
-                        </div>
+            <div class="info-card" id="demo-steps">
+                <p>Line up the numbers by their place values, then add or subtract each column from right to left!</p>
+            </div>
+
+            <div class="stacked-problem-card">
+                <div class="stacked-numbers">
+                    <div class="carry-row" id="carry-row"></div>
+                    <div class="stacked-row top-number" id="stacked-num1">
+                        <span class="digit">2</span>
+                        <span class="digit">4</span>
+                        <span class="digit">5</span>
                     </div>
-
-                    <div class="stacked-practice">
-                        <h3>🎯 Practice Problem</h3>
-                        <div class="stacked-problem" id="stacked-problem">
-                            <div class="stacked-numbers">
-                                <div class="stacked-row top-number" id="stacked-num1">
-                                    <span class="digit">2</span>
-                                    <span class="digit">4</span>
-                                    <span class="digit">5</span>
-                                </div>
-                                <div class="stacked-row operator-row">
-                                    <span class="operator" id="stacked-operator">+</span>
-                                    <span class="digit" id="stacked-num2-0">1</span>
-                                    <span class="digit" id="stacked-num2-1">3</span>
-                                    <span class="digit" id="stacked-num2-2">2</span>
-                                </div>
-                                <div class="stacked-line"></div>
-                                <div class="stacked-row answer-row" id="stacked-answer-row">
-                                    <input type="text" class="digit-input" id="ans-0" maxlength="1" oninput="checkStackedAnswer()">
-                                    <input type="text" class="digit-input" id="ans-1" maxlength="1" oninput="checkStackedAnswer()">
-                                    <input type="text" class="digit-input" id="ans-2" maxlength="1" oninput="checkStackedAnswer()">
-                                </div>
-                            </div>
-                            <div class="carry-row" id="carry-row">
-                                <!-- Carry indicators will appear here -->
-                            </div>
-                        </div>
-                        <div class="stacked-controls">
-                            <button class="btn btn-secondary" onclick="showStackedHint()">💡 Hint</button>
-                            <button class="btn btn-primary" onclick="newStackedProblem()">New Problem</button>
-                            <button class="btn btn-success" onclick="revealStackedAnswer()">Show Answer</button>
-                        </div>
-                        <div class="feedback" id="stacked-feedback"></div>
+                    <div class="stacked-row operator-row">
+                        <span class="operator" id="stacked-operator">+</span>
+                        <span class="digit" id="stacked-num2-0">1</span>
+                        <span class="digit" id="stacked-num2-1">3</span>
+                        <span class="digit" id="stacked-num2-2">2</span>
+                    </div>
+                    <div class="stacked-line"></div>
+                    <div class="stacked-row answer-row" id="stacked-answer-row">
+                        <input type="text" class="digit-input" id="ans-0" maxlength="1" oninput="checkStackedAnswer()">
+                        <input type="text" class="digit-input" id="ans-1" maxlength="1" oninput="checkStackedAnswer()">
+                        <input type="text" class="digit-input" id="ans-2" maxlength="1" oninput="checkStackedAnswer()">
                     </div>
                 </div>
             </div>
+
+            <div class="button-row">
+                <button class="btn btn-ghost" onclick="showStackedHint()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9 9a3 3 0 0 1 6 0c0 2-3 3-3 3M12 17h.01"/>
+                    </svg>
+                    Hint
+                </button>
+                <button class="btn btn-primary" onclick="newStackedProblem()">New Problem</button>
+                <button class="btn btn-secondary" onclick="revealStackedAnswer()">Show Answer</button>
+            </div>
+            <div class="feedback" id="stacked-feedback"></div>
         </section>
 
         <!-- Multiplication Section -->
         <section id="multiplication" class="section">
-            <div class="module-card">
-                <h2>✖️ Multiplication</h2>
-                <p class="intro-text">Multiplication is like adding the same number many times! Let's learn!</p>
+            <div class="section-header">
+                <h2>Multiplication</h2>
+                <p>Adding the same number many times!</p>
+            </div>
 
-                <div class="mult-visual">
-                    <h3>See Multiplication in Action</h3>
-                    <div class="mult-controls">
-                        <label>
-                            <span class="mult-num" id="mult-a">3</span>
-                            <input type="range" id="mult-slider-a" min="1" max="12" value="3" oninput="updateMultVisual()">
-                        </label>
-                        <span class="mult-symbol">×</span>
-                        <label>
-                            <span class="mult-num" id="mult-b">4</span>
-                            <input type="range" id="mult-slider-b" min="1" max="12" value="4" oninput="updateMultVisual()">
-                        </label>
-                        <span class="mult-symbol">=</span>
-                        <span class="mult-result" id="mult-result">12</span>
-                    </div>
-                    <div class="mult-grid" id="mult-grid">
-                        <!-- Visual grid will be generated here -->
-                    </div>
-                    <p class="mult-explanation" id="mult-explanation">
-                        3 × 4 means 3 groups of 4, or 4 + 4 + 4 = 12
-                    </p>
+            <div class="visual-card">
+                <div class="mult-equation">
+                    <span class="mult-num" id="mult-a">3</span>
+                    <span class="mult-symbol">×</span>
+                    <span class="mult-num" id="mult-b">4</span>
+                    <span class="mult-symbol">=</span>
+                    <span class="mult-result" id="mult-result">12</span>
                 </div>
-
-                <div class="times-table">
-                    <h3>📊 Times Table</h3>
-                    <select id="times-table-select" onchange="showTimesTable()">
-                        <option value="1">1 Times Table</option>
-                        <option value="2">2 Times Table</option>
-                        <option value="3">3 Times Table</option>
-                        <option value="4">4 Times Table</option>
-                        <option value="5">5 Times Table</option>
-                        <option value="6">6 Times Table</option>
-                        <option value="7">7 Times Table</option>
-                        <option value="8">8 Times Table</option>
-                        <option value="9">9 Times Table</option>
-                        <option value="10">10 Times Table</option>
-                        <option value="11">11 Times Table</option>
-                        <option value="12">12 Times Table</option>
-                    </select>
-                    <div class="times-table-display" id="times-table-display">
-                        <!-- Times table will appear here -->
-                    </div>
+                <div class="slider-row">
+                    <input type="range" id="mult-slider-a" min="1" max="12" value="3" oninput="updateMultVisual()">
+                    <input type="range" id="mult-slider-b" min="1" max="12" value="4" oninput="updateMultVisual()">
                 </div>
+                <div class="mult-grid" id="mult-grid"></div>
+                <p class="mult-explanation" id="mult-explanation">3 × 4 means 3 groups of 4</p>
+            </div>
 
-                <div class="mult-quiz">
-                    <h3>🎮 Multiplication Quiz</h3>
-                    <div class="quiz-problem">
-                        <span class="quiz-num" id="mult-quiz-a">?</span>
-                        <span class="quiz-symbol">×</span>
-                        <span class="quiz-num" id="mult-quiz-b">?</span>
-                        <span class="quiz-symbol">=</span>
-                        <input type="number" id="mult-quiz-answer" class="quiz-input" onkeypress="handleMultQuizEnter(event)">
-                    </div>
-                    <div class="quiz-controls">
-                        <button class="btn btn-primary" onclick="checkMultQuiz()">Check Answer</button>
-                        <button class="btn btn-secondary" onclick="newMultQuiz()">New Problem</button>
-                    </div>
-                    <div class="feedback" id="mult-feedback"></div>
-                    <div class="score-display">
-                        Score: <span id="mult-score">0</span> / <span id="mult-total">0</span>
-                    </div>
+            <div class="times-table-card">
+                <h3>Times Tables</h3>
+                <select id="times-table-select" onchange="showTimesTable()">
+                    <option value="1">1 Times Table</option>
+                    <option value="2">2 Times Table</option>
+                    <option value="3">3 Times Table</option>
+                    <option value="4">4 Times Table</option>
+                    <option value="5">5 Times Table</option>
+                    <option value="6">6 Times Table</option>
+                    <option value="7">7 Times Table</option>
+                    <option value="8">8 Times Table</option>
+                    <option value="9">9 Times Table</option>
+                    <option value="10">10 Times Table</option>
+                    <option value="11">11 Times Table</option>
+                    <option value="12">12 Times Table</option>
+                </select>
+                <div class="times-table-grid" id="times-table-display"></div>
+            </div>
+
+            <div class="quiz-card">
+                <h3>Quick Quiz</h3>
+                <div class="quiz-equation">
+                    <span class="quiz-num" id="mult-quiz-a">?</span>
+                    <span class="quiz-symbol">×</span>
+                    <span class="quiz-num" id="mult-quiz-b">?</span>
+                    <span class="quiz-symbol">=</span>
+                    <input type="number" id="mult-quiz-answer" class="quiz-input" onkeypress="handleMultQuizEnter(event)">
+                </div>
+                <div class="button-row">
+                    <button class="btn btn-primary" onclick="checkMultQuiz()">Check</button>
+                    <button class="btn btn-secondary" onclick="newMultQuiz()">New Problem</button>
+                </div>
+                <div class="feedback" id="mult-feedback"></div>
+                <div class="score-badge">
+                    <span id="mult-score">0</span> / <span id="mult-total">0</span>
                 </div>
             </div>
         </section>
 
         <!-- Division Section -->
         <section id="division" class="section">
-            <div class="module-card">
-                <h2>➗ Division</h2>
-                <p class="intro-text">Division is sharing equally! Let's learn how to divide numbers.</p>
+            <div class="section-header">
+                <h2>Division</h2>
+                <p>Sharing things equally!</p>
+            </div>
 
-                <div class="div-visual">
-                    <h3>See Division in Action</h3>
-                    <div class="div-scenario">
-                        <p id="div-story">If you have <strong>12 cookies</strong> and want to share them equally among <strong>3 friends</strong>, how many does each friend get?</p>
-                    </div>
-                    <div class="div-controls">
-                        <label>
-                            Total items:
-                            <input type="number" id="div-total" min="1" max="144" value="12" oninput="updateDivVisual()">
-                        </label>
-                        <span class="div-symbol">÷</span>
-                        <label>
-                            Groups:
-                            <input type="number" id="div-groups" min="1" max="12" value="3" oninput="updateDivVisual()">
-                        </label>
-                        <span class="div-symbol">=</span>
-                        <span class="div-result" id="div-result">4</span>
-                    </div>
-                    <div class="div-visual-area" id="div-visual-area">
-                        <!-- Visual groups will appear here -->
-                    </div>
+            <div class="story-card" id="div-story">
+                If you have <strong>12 cookies</strong> and want to share them equally among <strong>3 friends</strong>, how many does each friend get?
+            </div>
+
+            <div class="visual-card">
+                <div class="div-equation">
+                    <label>
+                        <span>Total</span>
+                        <input type="number" id="div-total" min="1" max="144" value="12" oninput="updateDivVisual()">
+                    </label>
+                    <span class="div-symbol">÷</span>
+                    <label>
+                        <span>Groups</span>
+                        <input type="number" id="div-groups" min="1" max="12" value="3" oninput="updateDivVisual()">
+                    </label>
+                    <span class="div-symbol">=</span>
+                    <span class="div-result" id="div-result">4</span>
                 </div>
+                <div class="div-visual-area" id="div-visual-area"></div>
+            </div>
 
-                <div class="div-quiz">
-                    <h3>🎮 Division Quiz</h3>
-                    <div class="quiz-problem">
-                        <span class="quiz-num" id="div-quiz-a">?</span>
-                        <span class="quiz-symbol">÷</span>
-                        <span class="quiz-num" id="div-quiz-b">?</span>
-                        <span class="quiz-symbol">=</span>
-                        <input type="number" id="div-quiz-answer" class="quiz-input" onkeypress="handleDivQuizEnter(event)">
-                    </div>
-                    <div class="quiz-controls">
-                        <button class="btn btn-primary" onclick="checkDivQuiz()">Check Answer</button>
-                        <button class="btn btn-secondary" onclick="newDivQuiz()">New Problem</button>
-                    </div>
-                    <div class="feedback" id="div-feedback"></div>
-                    <div class="score-display">
-                        Score: <span id="div-score">0</span> / <span id="div-total-score">0</span>
-                    </div>
+            <div class="quiz-card">
+                <h3>Quick Quiz</h3>
+                <div class="quiz-equation">
+                    <span class="quiz-num" id="div-quiz-a">?</span>
+                    <span class="quiz-symbol">÷</span>
+                    <span class="quiz-num" id="div-quiz-b">?</span>
+                    <span class="quiz-symbol">=</span>
+                    <input type="number" id="div-quiz-answer" class="quiz-input" onkeypress="handleDivQuizEnter(event)">
+                </div>
+                <div class="button-row">
+                    <button class="btn btn-primary" onclick="checkDivQuiz()">Check</button>
+                    <button class="btn btn-secondary" onclick="newDivQuiz()">New Problem</button>
+                </div>
+                <div class="feedback" id="div-feedback"></div>
+                <div class="score-badge">
+                    <span id="div-score">0</span> / <span id="div-total-score">0</span>
                 </div>
             </div>
         </section>
 
         <!-- Carry-Over Section -->
         <section id="carry-over" class="section">
-            <div class="module-card">
-                <h2>📤 Carrying in Addition</h2>
-                <p class="intro-text">When two digits add up to 10 or more, we "carry" to the next column!</p>
+            <div class="section-header">
+                <h2>Carrying in Addition</h2>
+                <p>When two digits add up to 10 or more!</p>
+            </div>
 
-                <div class="carry-demo">
-                    <h3>Watch How Carrying Works</h3>
-                    <div class="animated-problem" id="carry-demo-area">
+            <div class="demo-card">
+                <h3>Watch How It Works</h3>
+                <div class="animated-problem" id="carry-demo-area">
+                    <div class="carry-demo-layout">
                         <div class="demo-numbers">
                             <div class="carry-indicators" id="carry-indicators">
                                 <span class="carry-digit" id="carry-3"></span>
@@ -423,60 +513,74 @@
                                 <span class="demo-digit result" id="demo-ans-3"></span>
                             </div>
                         </div>
-                        <div class="step-explanation" id="carry-step-explanation">
-                            <p>Click "Show Steps" to see how carrying works!</p>
-                        </div>
-                    </div>
-                    <div class="demo-controls">
-                        <button class="btn btn-primary" onclick="animateCarryDemo()">Show Steps</button>
-                        <button class="btn btn-secondary" onclick="newCarryDemo()">New Problem</button>
-                        <button class="btn btn-success" onclick="resetCarryDemo()">Reset</button>
-                    </div>
-                </div>
-
-                <div class="carry-practice">
-                    <h3>Practice Carrying</h3>
-                    <div class="practice-problem-area" id="carry-practice-area">
-                        <div class="stacked-problem">
-                            <div class="stacked-numbers">
-                                <div class="carry-row-practice" id="carry-row-practice">
-                                    <input type="text" class="carry-input" id="carry-input-2" maxlength="1" oninput="checkCarryPractice()">
-                                    <input type="text" class="carry-input" id="carry-input-1" maxlength="1" oninput="checkCarryPractice()">
-                                    <input type="text" class="carry-input" id="carry-input-0" maxlength="1" oninput="checkCarryPractice()">
-                                </div>
-                                <div class="stacked-row top-number" id="carry-num1-row">
-                                </div>
-                                <div class="stacked-row operator-row" id="carry-num2-row">
-                                    <span class="operator">+</span>
-                                </div>
-                                <div class="stacked-line"></div>
-                                <div class="stacked-row answer-row" id="carry-answer-row">
-                                </div>
+                        <!-- Sum visualization bubble -->
+                        <div class="sum-visualization" id="sum-viz">
+                            <div class="sum-bubble" id="sum-bubble">
+                                <div class="sum-equation" id="sum-equation"></div>
+                                <div class="sum-split" id="sum-split"></div>
+                                <div class="sum-dots" id="sum-dots"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="stacked-controls">
-                        <button class="btn btn-secondary" onclick="showCarryHint()">Hint</button>
-                        <button class="btn btn-primary" onclick="newCarryPractice()">New Problem</button>
-                        <button class="btn btn-success" onclick="revealCarryAnswer()">Show Answer</button>
+                    <!-- Step timeline -->
+                    <div class="step-timeline" id="carry-timeline">
+                        <div class="timeline-track">
+                            <div class="timeline-progress" id="carry-timeline-progress"></div>
+                        </div>
+                        <div class="timeline-steps" id="carry-timeline-steps"></div>
+                        <div class="timeline-label" id="carry-timeline-label">Click "Show Steps" to begin</div>
                     </div>
-                    <div class="feedback" id="carry-feedback"></div>
-                    <div class="score-display">
-                        Score: <span id="carry-score">0</span> / <span id="carry-total">0</span>
+                    <div class="step-explanation" id="carry-step-explanation">
+                        <p>Click "Show Steps" to see how carrying works!</p>
                     </div>
+                </div>
+                <div class="button-row">
+                    <button class="btn btn-primary" onclick="animateCarryDemo()">Show Steps</button>
+                    <button class="btn btn-secondary" onclick="newCarryDemo()">New Problem</button>
+                    <button class="btn btn-ghost" onclick="resetCarryDemo()">Reset</button>
+                </div>
+            </div>
+
+            <div class="practice-card">
+                <h3>Practice Carrying</h3>
+                <div class="stacked-problem-card" id="carry-practice-area">
+                    <div class="stacked-numbers">
+                        <div class="carry-row-practice" id="carry-row-practice">
+                            <input type="text" class="carry-input" id="carry-input-2" maxlength="1" oninput="checkCarryPractice()">
+                            <input type="text" class="carry-input" id="carry-input-1" maxlength="1" oninput="checkCarryPractice()">
+                            <input type="text" class="carry-input" id="carry-input-0" maxlength="1" oninput="checkCarryPractice()">
+                        </div>
+                        <div class="stacked-row top-number" id="carry-num1-row"></div>
+                        <div class="stacked-row operator-row" id="carry-num2-row">
+                            <span class="operator">+</span>
+                        </div>
+                        <div class="stacked-line"></div>
+                        <div class="stacked-row answer-row" id="carry-answer-row"></div>
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button class="btn btn-ghost" onclick="showCarryHint()">Hint</button>
+                    <button class="btn btn-primary" onclick="newCarryPractice()">New Problem</button>
+                    <button class="btn btn-secondary" onclick="revealCarryAnswer()">Show Answer</button>
+                </div>
+                <div class="feedback" id="carry-feedback"></div>
+                <div class="score-badge">
+                    <span id="carry-score">0</span> / <span id="carry-total">0</span>
                 </div>
             </div>
         </section>
 
         <!-- Borrowing Section -->
         <section id="borrowing" class="section">
-            <div class="module-card">
-                <h2>📥 Borrowing in Subtraction</h2>
-                <p class="intro-text">When the top digit is smaller than the bottom, we "borrow" from the next column!</p>
+            <div class="section-header">
+                <h2>Borrowing in Subtraction</h2>
+                <p>When the top digit is smaller!</p>
+            </div>
 
-                <div class="borrow-demo">
-                    <h3>Watch How Borrowing Works</h3>
-                    <div class="animated-problem" id="borrow-demo-area">
+            <div class="demo-card">
+                <h3>Watch How It Works</h3>
+                <div class="animated-problem" id="borrow-demo-area">
+                    <div class="borrow-demo-layout">
                         <div class="demo-numbers">
                             <div class="borrow-indicators" id="borrow-indicators">
                                 <span class="borrow-digit" id="borrow-from-2"></span>
@@ -489,7 +593,7 @@
                                 <span class="demo-digit" id="borrow-num1-2"></span>
                             </div>
                             <div class="demo-row operator-row">
-                                <span class="demo-operator">-</span>
+                                <span class="demo-operator">−</span>
                                 <span class="demo-digit" id="borrow-num2-0"></span>
                                 <span class="demo-digit" id="borrow-num2-1"></span>
                                 <span class="demo-digit" id="borrow-num2-2"></span>
@@ -501,146 +605,167 @@
                                 <span class="demo-digit result" id="borrow-ans-2"></span>
                             </div>
                         </div>
-                        <div class="step-explanation" id="borrow-step-explanation">
-                            <p>Click "Show Steps" to see how borrowing works!</p>
-                        </div>
-                    </div>
-                    <div class="demo-controls">
-                        <button class="btn btn-primary" onclick="animateBorrowDemo()">Show Steps</button>
-                        <button class="btn btn-secondary" onclick="newBorrowDemo()">New Problem</button>
-                        <button class="btn btn-success" onclick="resetBorrowDemo()">Reset</button>
-                    </div>
-                </div>
-
-                <div class="borrow-practice">
-                    <h3>Practice Borrowing</h3>
-                    <div class="practice-problem-area" id="borrow-practice-area">
-                        <div class="stacked-problem">
-                            <div class="stacked-numbers">
-                                <div class="borrow-row-practice" id="borrow-row-practice">
-                                    <span class="borrow-indicator" id="borrow-ind-2"></span>
-                                    <span class="borrow-indicator" id="borrow-ind-1"></span>
-                                    <span class="borrow-indicator" id="borrow-ind-0"></span>
-                                </div>
-                                <div class="stacked-row top-number" id="borrow-num1-row">
-                                </div>
-                                <div class="stacked-row operator-row" id="borrow-num2-row">
-                                    <span class="operator">-</span>
-                                </div>
-                                <div class="stacked-line"></div>
-                                <div class="stacked-row answer-row" id="borrow-answer-row">
-                                </div>
+                        <!-- Borrow visualization bubble -->
+                        <div class="borrow-visualization" id="borrow-viz">
+                            <div class="borrow-bubble" id="borrow-bubble">
+                                <div class="borrow-equation" id="borrow-equation"></div>
+                                <div class="borrow-help" id="borrow-help"></div>
+                                <div class="borrow-dots" id="borrow-dots"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="stacked-controls">
-                        <button class="btn btn-secondary" onclick="showBorrowHint()">Hint</button>
-                        <button class="btn btn-primary" onclick="newBorrowPractice()">New Problem</button>
-                        <button class="btn btn-success" onclick="revealBorrowAnswer()">Show Answer</button>
+                    <!-- Step timeline -->
+                    <div class="step-timeline" id="borrow-timeline">
+                        <div class="timeline-track">
+                            <div class="timeline-progress" id="borrow-timeline-progress"></div>
+                        </div>
+                        <div class="timeline-steps" id="borrow-timeline-steps"></div>
+                        <div class="timeline-label" id="borrow-timeline-label">Click "Show Steps" to begin</div>
                     </div>
-                    <div class="feedback" id="borrow-feedback"></div>
-                    <div class="score-display">
-                        Score: <span id="borrow-score">0</span> / <span id="borrow-total">0</span>
+                    <div class="step-explanation" id="borrow-step-explanation">
+                        <p>Click "Show Steps" to see how borrowing works!</p>
                     </div>
+                </div>
+                <div class="button-row">
+                    <button class="btn btn-primary" onclick="animateBorrowDemo()">Show Steps</button>
+                    <button class="btn btn-secondary" onclick="newBorrowDemo()">New Problem</button>
+                    <button class="btn btn-ghost" onclick="resetBorrowDemo()">Reset</button>
+                </div>
+            </div>
+
+            <div class="practice-card">
+                <h3>Practice Borrowing</h3>
+                <div class="stacked-problem-card" id="borrow-practice-area">
+                    <div class="stacked-numbers">
+                        <div class="borrow-row-practice" id="borrow-row-practice">
+                            <span class="borrow-indicator" id="borrow-ind-2"></span>
+                            <span class="borrow-indicator" id="borrow-ind-1"></span>
+                            <span class="borrow-indicator" id="borrow-ind-0"></span>
+                        </div>
+                        <div class="stacked-row top-number" id="borrow-num1-row"></div>
+                        <div class="stacked-row operator-row" id="borrow-num2-row">
+                            <span class="operator">−</span>
+                        </div>
+                        <div class="stacked-line"></div>
+                        <div class="stacked-row answer-row" id="borrow-answer-row"></div>
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button class="btn btn-ghost" onclick="showBorrowHint()">Hint</button>
+                    <button class="btn btn-primary" onclick="newBorrowPractice()">New Problem</button>
+                    <button class="btn btn-secondary" onclick="revealBorrowAnswer()">Show Answer</button>
+                </div>
+                <div class="feedback" id="borrow-feedback"></div>
+                <div class="score-badge">
+                    <span id="borrow-score">0</span> / <span id="borrow-total">0</span>
                 </div>
             </div>
         </section>
 
         <!-- Practice Section -->
         <section id="practice" class="section">
-            <div class="module-card">
-                <h2>🎯 Practice Area</h2>
-                <p class="intro-text">Choose what you want to practice and let's go!</p>
+            <div class="section-header">
+                <h2>Practice Mode</h2>
+                <p>Choose your challenge and let's go!</p>
+            </div>
 
-                <div class="practice-setup">
-                    <div class="setup-option">
-                        <label>What do you want to practice?</label>
-                        <select id="practice-type">
-                            <option value="addition">Addition (+)</option>
-                            <option value="subtraction">Subtraction (-)</option>
-                            <option value="multiplication">Multiplication (×)</option>
-                            <option value="division">Division (÷)</option>
-                            <option value="mixed">Mixed (All Types!)</option>
-                        </select>
-                    </div>
-                    <div class="setup-option">
-                        <label>How hard?</label>
-                        <select id="practice-difficulty">
-                            <option value="easy">Easy (1-10)</option>
-                            <option value="medium">Medium (10-100)</option>
-                            <option value="hard">Hard (100-1000)</option>
-                        </select>
-                    </div>
-                    <div class="setup-option">
-                        <label>How many problems?</label>
-                        <select id="practice-count">
-                            <option value="5">5 Problems</option>
-                            <option value="10">10 Problems</option>
-                            <option value="15">15 Problems</option>
-                            <option value="20">20 Problems</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary btn-large" onclick="startPractice()">
-                        Start Practice! 🚀
-                    </button>
+            <div class="practice-setup">
+                <div class="setup-group">
+                    <label for="practice-type">What to practice?</label>
+                    <select id="practice-type">
+                        <option value="addition">Addition (+)</option>
+                        <option value="subtraction">Subtraction (−)</option>
+                        <option value="multiplication">Multiplication (×)</option>
+                        <option value="division">Division (÷)</option>
+                        <option value="mixed">Mixed (All Types!)</option>
+                    </select>
                 </div>
+                <div class="setup-group">
+                    <label for="practice-difficulty">Difficulty</label>
+                    <select id="practice-difficulty">
+                        <option value="easy">Easy (1-10)</option>
+                        <option value="medium">Medium (10-100)</option>
+                        <option value="hard">Hard (100-1000)</option>
+                    </select>
+                </div>
+                <div class="setup-group">
+                    <label for="practice-count">How many?</label>
+                    <select id="practice-count">
+                        <option value="5">5 Problems</option>
+                        <option value="10">10 Problems</option>
+                        <option value="15">15 Problems</option>
+                        <option value="20">20 Problems</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-large" onclick="startPractice()">
+                    Start Practice!
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19"/>
+                    </svg>
+                </button>
+            </div>
 
-                <div class="practice-area" id="practice-area" style="display: none;">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="practice-progress"></div>
-                        <span class="progress-text" id="practice-progress-text">0 / 0</span>
+            <div class="practice-area" id="practice-area" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="practice-progress"></div>
+                </div>
+                <div class="progress-text" id="practice-progress-text">0 / 0</div>
+
+                <div class="practice-problem" id="practice-problem">
+                    <div class="problem-equation">
+                        <span class="problem-num" id="practice-num1">?</span>
+                        <span class="problem-op" id="practice-op">+</span>
+                        <span class="problem-num" id="practice-num2">?</span>
+                        <span class="problem-eq">=</span>
+                        <input type="number" id="practice-answer" class="problem-input" onkeypress="handlePracticeEnter(event)">
                     </div>
+                    <div class="button-row">
+                        <button class="btn btn-primary" onclick="checkPracticeAnswer()">Check</button>
+                        <button class="btn btn-ghost" onclick="skipProblem()">Skip</button>
+                    </div>
+                    <div class="feedback" id="practice-feedback"></div>
+                </div>
+            </div>
 
-                    <div class="practice-problem" id="practice-problem">
-                        <div class="problem-display" id="problem-display">
-                            <span class="problem-num" id="practice-num1">?</span>
-                            <span class="problem-op" id="practice-op">+</span>
-                            <span class="problem-num" id="practice-num2">?</span>
-                            <span class="problem-eq">=</span>
-                            <input type="number" id="practice-answer" class="problem-input" onkeypress="handlePracticeEnter(event)">
-                        </div>
-                        <div class="problem-controls">
-                            <button class="btn btn-primary" onclick="checkPracticeAnswer()">Check</button>
-                            <button class="btn btn-secondary" onclick="skipProblem()">Skip</button>
-                        </div>
-                        <div class="feedback" id="practice-feedback"></div>
+            <div class="practice-results" id="practice-results" style="display: none;">
+                <div class="results-celebration">
+                    <svg viewBox="0 0 100 100" width="80" height="80">
+                        <circle cx="50" cy="50" r="45" fill="#FFD93D"/>
+                        <circle cx="35" cy="40" r="6" fill="#4A3728"/>
+                        <circle cx="65" cy="40" r="6" fill="#4A3728"/>
+                        <path d="M30 60Q50 80 70 60" stroke="#4A3728" stroke-width="4" fill="none"/>
+                    </svg>
+                    <h3>Great Job!</h3>
+                </div>
+                <div class="results-stats">
+                    <div class="result-item">
+                        <span class="result-number" id="results-correct">0</span>
+                        <span class="result-label">Correct</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-number" id="results-total">0</span>
+                        <span class="result-label">Total</span>
+                    </div>
+                    <div class="result-item highlight">
+                        <span class="result-number" id="results-percent">0%</span>
+                        <span class="result-label">Score</span>
                     </div>
                 </div>
-
-                <div class="practice-results" id="practice-results" style="display: none;">
-                    <h3>🏆 Great Job!</h3>
-                    <div class="results-display">
-                        <div class="result-stat">
-                            <span class="stat-number" id="results-correct">0</span>
-                            <span class="stat-label">Correct</span>
-                        </div>
-                        <div class="result-stat">
-                            <span class="stat-number" id="results-total">0</span>
-                            <span class="stat-label">Total</span>
-                        </div>
-                        <div class="result-stat">
-                            <span class="stat-number" id="results-percent">0%</span>
-                            <span class="stat-label">Score</span>
-                        </div>
-                    </div>
-                    <div class="stars-earned" id="stars-earned">
-                        <!-- Stars will appear here -->
-                    </div>
-                    <button class="btn btn-primary btn-large" onclick="resetPractice()">
-                        Practice Again! 🔄
-                    </button>
-                </div>
+                <div class="stars-earned" id="stars-earned"></div>
+                <button class="btn btn-primary btn-large" onclick="resetPractice()">
+                    Practice Again!
+                </button>
             </div>
         </section>
     </main>
 
-    <footer>
-        <p>Made with ❤️ for Kaelyn's Math Adventure</p>
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p>Made with love for Kaelyn's math journey</p>
     </footer>
 
-    <div class="celebration" id="celebration" style="display: none;">
-        <!-- Confetti will appear here -->
-    </div>
+    <!-- Celebration overlay -->
+    <div class="celebration" id="celebration" style="display: none;"></div>
 
     <script src="app.js"></script>
 </body>

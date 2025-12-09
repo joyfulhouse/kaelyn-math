@@ -110,9 +110,9 @@ function updateUIFromState() {
     }
 
     // Update welcome message with name
-    const welcomeH2 = document.querySelector('.welcome-card h2');
-    if (welcomeH2 && sessionState.userName) {
-        welcomeH2.innerHTML = `Welcome, ${sessionState.userName}! 🌟`;
+    const userNameDisplay = document.getElementById('user-name-display');
+    if (userNameDisplay && sessionState.userName) {
+        userNameDisplay.textContent = sessionState.userName;
     }
 
     // Update progress stats display
@@ -122,32 +122,21 @@ function updateUIFromState() {
 function updateProgressDisplay() {
     if (!sessionState) return;
 
-    const statsContainer = document.getElementById('progress-stats');
-    if (statsContainer) {
-        const practice = sessionState.practice || {};
-        const accuracy = practice.totalProblems > 0
-            ? Math.round((practice.totalCorrect / practice.totalProblems) * 100)
-            : 0;
+    const practice = sessionState.practice || {};
+    const accuracy = practice.totalProblems > 0
+        ? Math.round((practice.totalCorrect / practice.totalProblems) * 100)
+        : 0;
 
-        statsContainer.innerHTML = `
-            <div class="stat-item">
-                <span class="stat-value">${practice.totalSessions || 0}</span>
-                <span class="stat-label">Sessions</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-value">${practice.totalProblems || 0}</span>
-                <span class="stat-label">Problems</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-value">${accuracy}%</span>
-                <span class="stat-label">Accuracy</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-value">${practice.bestScore || 0}%</span>
-                <span class="stat-label">Best Score</span>
-            </div>
-        `;
-    }
+    // Update individual stat elements
+    const sessionsEl = document.getElementById('stat-sessions');
+    const problemsEl = document.getElementById('stat-problems');
+    const accuracyEl = document.getElementById('stat-accuracy');
+    const bestEl = document.getElementById('stat-best');
+
+    if (sessionsEl) sessionsEl.textContent = practice.totalSessions || 0;
+    if (problemsEl) problemsEl.textContent = practice.totalProblems || 0;
+    if (accuracyEl) accuracyEl.textContent = accuracy + '%';
+    if (bestEl) bestEl.textContent = (practice.bestScore || 0) + '%';
 }
 
 // ==========================================
@@ -195,8 +184,8 @@ function showSection(sectionId) {
     // Show selected section
     document.getElementById(sectionId).classList.add('active');
 
-    // Update nav buttons
-    document.querySelectorAll('.nav-btn').forEach(btn => {
+    // Update nav pills
+    document.querySelectorAll('.nav-pill').forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.section === sectionId) {
             btn.classList.add('active');
@@ -296,7 +285,10 @@ function updateBlocksVisual(thousands, hundreds, tens, ones) {
     }
 
     if (thousands === 0 && hundreds === 0 && tens === 0 && ones === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #636e72;">Enter a number to see the blocks!</p>';
+        const emptyMsg = document.createElement('p');
+        emptyMsg.style.cssText = 'text-align: center; color: #8B7355;';
+        emptyMsg.textContent = 'Enter a number to see the blocks!';
+        container.appendChild(emptyMsg);
     }
 }
 
@@ -413,7 +405,7 @@ function checkPVAnswer(selected, button) {
 function switchStackedTab(operation) {
     currentStackedOperation = operation;
 
-    document.querySelectorAll('.stacked-tabs .tab-btn').forEach(btn => {
+    document.querySelectorAll('.tab-row .tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
 
@@ -718,7 +710,8 @@ function updateDivVisual() {
     const visualArea = document.getElementById('div-visual-area');
     visualArea.innerHTML = '';
 
-    const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#74b9ff', '#fd79a8'];
+    // Paper craft color palette
+    const colors = ['#FF7F6B', '#8FBC8F', '#FFD93D', '#7EB5D6', '#FFB5A7', '#B8D4B8'];
 
     for (let i = 0; i < groups; i++) {
         const group = document.createElement('div');
@@ -1044,7 +1037,8 @@ function celebrate() {
     celebration.style.display = 'block';
     celebration.innerHTML = '';
 
-    const colors = ['#6c5ce7', '#00b894', '#fdcb6e', '#e17055', '#74b9ff', '#fd79a8', '#ffeaa7'];
+    // Paper craft color palette
+    const colors = ['#FF7F6B', '#8FBC8F', '#FFD93D', '#7EB5D6', '#FFB5A7', '#B8D4B8', '#FFE97F'];
 
     for (let i = 0; i < 50; i++) {
         const confetti = document.createElement('div');
@@ -1096,9 +1090,10 @@ let carryAnimationInterval = null;
 function generateCarryProblem() {
     let num1, num2;
     // Ensure at least one column requires carrying
+    // Use wider range (100-799) to allow sums that overflow to thousands (up to 1598)
     do {
-        num1 = Math.floor(Math.random() * 400) + 100; // 100-499
-        num2 = Math.floor(Math.random() * 400) + 100; // 100-499
+        num1 = Math.floor(Math.random() * 700) + 100; // 100-799
+        num2 = Math.floor(Math.random() * 700) + 100; // 100-799
     } while (!needsCarry(num1, num2));
 
     return { num1, num2, answer: num1 + num2 };
@@ -1140,9 +1135,9 @@ function calculateCarries(num1, num2) {
 
 // Initialize carry demo with a new problem
 function newCarryDemo() {
-    resetCarryDemo();
+    // Generate the problem FIRST so resetCarryDemo displays actual numbers
     carryDemoProblem = generateCarryProblem();
-    displayCarryDemo();
+    resetCarryDemo();
 }
 
 function displayCarryDemo() {
@@ -1187,7 +1182,141 @@ function resetCarryDemo() {
         carryAnimationInterval = null;
     }
     carryAnimationStep = 0;
+    // Hide sum visualization
+    const sumViz = document.getElementById('sum-viz');
+    if (sumViz) sumViz.classList.remove('visible');
+    // Reset timeline
+    resetTimeline('carry');
     displayCarryDemo();
+}
+
+// Helper to show sum visualization with dots
+function showSumVisualization(d1, d2, prevCarry, sum) {
+    const sumViz = document.getElementById('sum-viz');
+    const sumEquation = document.getElementById('sum-equation');
+    const sumSplit = document.getElementById('sum-split');
+    const sumDots = document.getElementById('sum-dots');
+
+    // Show the bubble
+    sumViz.classList.add('visible');
+
+    // Build equation display
+    if (prevCarry > 0) {
+        sumEquation.innerHTML = `<span class="digit-highlight">${d1}</span> + <span class="digit-highlight">${d2}</span> + <span class="carry-highlight">1</span> = <strong>${sum}</strong>`;
+    } else {
+        sumEquation.innerHTML = `<span class="digit-highlight">${d1}</span> + <span class="digit-highlight">${d2}</span> = <strong>${sum}</strong>`;
+    }
+
+    // Clear previous dots
+    sumDots.innerHTML = '';
+    sumSplit.classList.remove('visible');
+
+    // Create dots for the sum
+    for (let i = 0; i < sum; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'sum-dot';
+        dot.style.animationDelay = `${i * 0.05}s`;
+        sumDots.appendChild(dot);
+    }
+}
+
+// Helper to show the sum splitting animation (e.g., 15 = 10 + 5)
+function showSumSplit(sum, resultDigit) {
+    const sumSplit = document.getElementById('sum-split');
+    const sumDots = document.getElementById('sum-dots');
+
+    // Show the split explanation
+    sumSplit.innerHTML = `<span class="ten-part">10</span> + <span class="ones-part">${resultDigit}</span> = ${sum}`;
+    sumSplit.classList.add('visible');
+
+    // Update dots to show the split - first 10 are "carry" dots, rest are "stays" dots
+    const dots = sumDots.querySelectorAll('.sum-dot');
+    dots.forEach((dot, i) => {
+        if (i < 10) {
+            dot.classList.add('carry-dot');
+        } else {
+            dot.classList.add('stays-dot');
+        }
+    });
+
+    // Add label
+    let label = sumDots.querySelector('.sum-label');
+    if (!label) {
+        label = document.createElement('div');
+        label.className = 'sum-label';
+        sumDots.appendChild(label);
+    }
+    label.innerHTML = `<span class="carry-label">10 goes up</span> • <span class="stays-label">${resultDigit} stays</span>`;
+}
+
+// Helper to hide sum visualization
+function hideSumVisualization() {
+    const sumViz = document.getElementById('sum-viz');
+    sumViz.classList.remove('visible');
+}
+
+// Timeline helper functions
+function initTimeline(prefix, totalSteps) {
+    const stepsContainer = document.getElementById(`${prefix}-timeline-steps`);
+    const progressBar = document.getElementById(`${prefix}-timeline-progress`);
+    const label = document.getElementById(`${prefix}-timeline-label`);
+
+    // Clear and create step dots
+    stepsContainer.innerHTML = '';
+    for (let i = 0; i < totalSteps; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'timeline-dot upcoming';
+        dot.textContent = i + 1;
+        dot.id = `${prefix}-step-${i}`;
+        stepsContainer.appendChild(dot);
+    }
+
+    // Reset progress bar
+    progressBar.style.width = '0%';
+
+    // Update label
+    label.innerHTML = `Step <span class="current-step">1</span> of <span class="total-steps">${totalSteps}</span>`;
+}
+
+function updateTimeline(prefix, currentStep, totalSteps) {
+    const progressBar = document.getElementById(`${prefix}-timeline-progress`);
+    const label = document.getElementById(`${prefix}-timeline-label`);
+
+    // Update progress bar
+    const progress = ((currentStep + 1) / totalSteps) * 100;
+    progressBar.style.width = `${progress}%`;
+
+    // Update dots
+    for (let i = 0; i < totalSteps; i++) {
+        const dot = document.getElementById(`${prefix}-step-${i}`);
+        if (dot) {
+            dot.classList.remove('completed', 'active', 'upcoming');
+            if (i < currentStep) {
+                dot.classList.add('completed');
+            } else if (i === currentStep) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.add('upcoming');
+            }
+        }
+    }
+
+    // Update label
+    if (currentStep >= totalSteps - 1) {
+        label.innerHTML = `<span class="current-step">Complete!</span>`;
+    } else {
+        label.innerHTML = `Step <span class="current-step">${currentStep + 1}</span> of <span class="total-steps">${totalSteps}</span>`;
+    }
+}
+
+function resetTimeline(prefix) {
+    const stepsContainer = document.getElementById(`${prefix}-timeline-steps`);
+    const progressBar = document.getElementById(`${prefix}-timeline-progress`);
+    const label = document.getElementById(`${prefix}-timeline-label`);
+
+    stepsContainer.innerHTML = '';
+    progressBar.style.width = '0%';
+    label.textContent = 'Click "Show Steps" to begin';
 }
 
 function animateCarryDemo() {
@@ -1196,17 +1325,19 @@ function animateCarryDemo() {
     }
 
     resetCarryDemo();
+    hideSumVisualization();
 
     const { num1, num2, answer } = carryDemoProblem;
     const str1 = num1.toString().padStart(3, '0');
     const str2 = num2.toString().padStart(3, '0');
     const ansStr = answer.toString().padStart(4, '0');
 
-    let step = 0;
     let carry = 0;
     const steps = [];
 
-    // Build animation steps
+    // We'll initialize the timeline after building the steps array
+
+    // Build animation steps with kid-friendly language
     for (let col = 2; col >= 0; col--) {
         const d1 = parseInt(str1[col]);
         const d2 = parseInt(str2[col]);
@@ -1214,33 +1345,50 @@ function animateCarryDemo() {
         const resultDigit = sum % 10;
         const newCarry = sum >= 10 ? 1 : 0;
 
+        // Column name for kid-friendly explanation
+        const colName = col === 2 ? 'ones' : col === 1 ? 'tens' : 'hundreds';
+
+        // Step 1: Highlight the column and show the addition
         steps.push({
             type: 'highlight',
             col: col,
             d1: d1,
             d2: d2,
             prevCarry: carry,
+            sum: sum,
             explanation: carry > 0
-                ? `<span class="step-number">${4 - col}</span> Add column: ${d1} + ${d2} + <span class="carry-text">1</span> (carry) = ${sum}`
-                : `<span class="step-number">${4 - col}</span> Add column: ${d1} + ${d2} = ${sum}`
+                ? `<span class="step-number">${4 - col}</span> Let's add the <strong>${colName}</strong>: ${d1} + ${d2} + <span class="carry-text">1</span> = <strong>${sum}</strong>`
+                : `<span class="step-number">${4 - col}</span> Let's add the <strong>${colName}</strong>: ${d1} + ${d2} = <strong>${sum}</strong>`
         });
 
         if (newCarry) {
+            // Step 2a: Show the sum is too big and needs splitting
+            steps.push({
+                type: 'show-split',
+                col: col,
+                sum: sum,
+                resultDigit: resultDigit,
+                explanation: `<strong>${sum}</strong> is bigger than 9! That's too big for one spot. Let's split it into <span class="carry-text">10</span> and <span class="highlight-text">${resultDigit}</span>.`
+            });
+
+            // Step 3a: Do the carry
             steps.push({
                 type: 'carry',
                 col: col,
                 sum: sum,
                 resultDigit: resultDigit,
                 answerCol: col + 1,
-                explanation: `${sum} is 10 or more! Write <span class="highlight-text">${resultDigit}</span> and <span class="carry-text">carry the 1</span> to the next column!`
+                explanation: `Write <span class="highlight-text">${resultDigit}</span> here. The <span class="carry-text">10</span> becomes a <span class="carry-text">1</span> that goes to the next column!`
             });
         } else {
+            // Step 2b: Simple write
             steps.push({
                 type: 'write',
                 col: col,
+                sum: sum,
                 resultDigit: resultDigit,
                 answerCol: col + 1,
-                explanation: `Write <span class="highlight-text">${resultDigit}</span> in the answer.`
+                explanation: `${sum} fits! Write <span class="highlight-text">${resultDigit}</span> in the answer.`
             });
         }
 
@@ -1251,17 +1399,19 @@ function animateCarryDemo() {
     if (carry) {
         steps.push({
             type: 'final-carry',
-            explanation: `Don't forget the final <span class="carry-text">1</span> at the front!`
+            explanation: `We still have a <span class="carry-text">1</span> left over! It goes at the very front.`
         });
     }
 
     steps.push({
         type: 'complete',
-        explanation: `Done! ${num1} + ${num2} = <strong>${answer}</strong>`
+        explanation: `All done! ${num1} + ${num2} = <strong>${answer}</strong>`
     });
 
+    // Initialize the timeline with the total number of steps
+    initTimeline('carry', steps.length);
+
     let currentStep = 0;
-    let currentCarry = 0;
 
     carryAnimationInterval = setInterval(() => {
         if (currentStep >= steps.length) {
@@ -1269,6 +1419,9 @@ function animateCarryDemo() {
             carryAnimationInterval = null;
             return;
         }
+
+        // Update timeline progress
+        updateTimeline('carry', currentStep, steps.length);
 
         const s = steps[currentStep];
         document.getElementById('carry-step-explanation').innerHTML = `<p>${s.explanation}</p>`;
@@ -1283,6 +1436,13 @@ function animateCarryDemo() {
             case 'highlight':
                 document.getElementById(`demo-num1-${s.col}`).classList.add('active');
                 document.getElementById(`demo-num2-${s.col}`).classList.add('active');
+                // Show the sum visualization with dots
+                showSumVisualization(s.d1, s.d2, s.prevCarry, s.sum);
+                break;
+
+            case 'show-split':
+                // Show the split animation (10 + X)
+                showSumSplit(s.sum, s.resultDigit);
                 break;
 
             case 'carry':
@@ -1290,19 +1450,23 @@ function animateCarryDemo() {
                 document.getElementById(`demo-ans-${s.answerCol}`).textContent = s.resultDigit;
                 document.getElementById(`demo-ans-${s.answerCol}`).classList.add('digit-change');
 
-                // Show carry animation
-                const carryEl = document.getElementById(`carry-${s.col}`);
+                // Show carry animation - carry goes to the NEXT column (to the left)
+                // Carry element mapping: carry-3=thousands, carry-2=hundreds, carry-1=tens, carry-0=ones
+                // When adding col X, carry goes to position 3-col (e.g., col=2 ones → carry-1 tens)
+                const carryEl = document.getElementById(`carry-${3 - s.col}`);
                 if (carryEl) {
                     carryEl.textContent = '1';
                     carryEl.classList.add('animate-up', 'visible');
                 }
-                currentCarry = 1;
+                // Hide sum viz after showing carry
+                setTimeout(() => hideSumVisualization(), 800);
                 break;
 
             case 'write':
                 document.getElementById(`demo-ans-${s.answerCol}`).textContent = s.resultDigit;
                 document.getElementById(`demo-ans-${s.answerCol}`).classList.add('digit-change');
-                currentCarry = 0;
+                // Hide sum viz
+                setTimeout(() => hideSumVisualization(), 500);
                 break;
 
             case 'final-carry':
@@ -1311,12 +1475,13 @@ function animateCarryDemo() {
                 break;
 
             case 'complete':
+                hideSumVisualization();
                 celebrate();
                 break;
         }
 
         currentStep++;
-    }, 2000);
+    }, 2500); // Slightly longer delay for kids to follow along
 }
 
 // Practice functions for carry-over
@@ -1479,9 +1644,9 @@ function needsBorrow(num1, num2) {
 
 // Initialize borrow demo with a new problem
 function newBorrowDemo() {
-    resetBorrowDemo();
+    // Generate the problem FIRST so resetBorrowDemo displays actual numbers
     borrowDemoProblem = generateBorrowProblem();
-    displayBorrowDemo();
+    resetBorrowDemo();
 }
 
 function displayBorrowDemo() {
@@ -1526,7 +1691,109 @@ function resetBorrowDemo() {
         clearInterval(borrowAnimationInterval);
         borrowAnimationInterval = null;
     }
+    // Hide borrow visualization
+    const borrowViz = document.getElementById('borrow-viz');
+    if (borrowViz) borrowViz.classList.remove('visible');
+    // Reset timeline
+    resetTimeline('borrow');
     displayBorrowDemo();
+}
+
+// Helper to show borrow visualization - "I can't take X from Y!"
+function showBorrowProblem(d1, d2) {
+    const borrowViz = document.getElementById('borrow-viz');
+    const borrowEquation = document.getElementById('borrow-equation');
+    const borrowHelp = document.getElementById('borrow-help');
+    const borrowDots = document.getElementById('borrow-dots');
+
+    // Show the bubble
+    borrowViz.classList.add('visible');
+
+    // Show the problem
+    borrowEquation.innerHTML = `<span class="top-digit">${d1}</span> − <span class="bottom-digit">${d2}</span> = <span class="cant-do">?</span>`;
+
+    // Hide help initially
+    borrowHelp.classList.remove('visible');
+
+    // Show dots for what we have
+    borrowDots.innerHTML = '';
+    for (let i = 0; i < d1; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'borrow-dot original-dot';
+        dot.style.animationDelay = `${i * 0.1}s`;
+        borrowDots.appendChild(dot);
+    }
+}
+
+// Helper to show we need to borrow
+function showBorrowNeeded(d1, d2) {
+    const borrowHelp = document.getElementById('borrow-help');
+    borrowHelp.innerHTML = `We only have <span class="borrow-ten">${d1}</span> but need to take away <span class="borrow-ten">${d2}</span>!`;
+    borrowHelp.classList.add('visible');
+}
+
+// Helper to show the borrowed 10 being added
+function showBorrowAdd(originalD1, newD1) {
+    const borrowHelp = document.getElementById('borrow-help');
+    const borrowDots = document.getElementById('borrow-dots');
+
+    borrowHelp.innerHTML = `Borrow <span class="borrow-ten">10</span> from next door! ${originalD1} + 10 = <span class="new-number">${newD1}</span>`;
+
+    // Add 10 more dots (borrowed)
+    borrowDots.innerHTML = '';
+
+    // First show original dots
+    for (let i = 0; i < originalD1; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'borrow-dot original-dot';
+        dot.style.animationDelay = `${i * 0.05}s`;
+        borrowDots.appendChild(dot);
+    }
+
+    // Add plus sign
+    const plusDiv = document.createElement('div');
+    plusDiv.className = 'borrow-dots-divider';
+    plusDiv.textContent = '+';
+    borrowDots.appendChild(plusDiv);
+
+    // Then show borrowed dots
+    for (let i = 0; i < 10; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'borrow-dot borrowed-dot';
+        dot.style.animationDelay = `${(originalD1 + i) * 0.05}s`;
+        borrowDots.appendChild(dot);
+    }
+
+    // Add label
+    const label = document.createElement('div');
+    label.className = 'borrow-label';
+    label.innerHTML = `<span class="original-label">${originalD1} we had</span> + <span class="borrowed-label">10 borrowed</span> = ${newD1}`;
+    borrowDots.appendChild(label);
+}
+
+// Helper to show the subtraction with enough dots
+function showBorrowSubtract(newD1, d2, result) {
+    const borrowEquation = document.getElementById('borrow-equation');
+    const borrowHelp = document.getElementById('borrow-help');
+    const borrowDots = document.getElementById('borrow-dots');
+
+    borrowEquation.innerHTML = `<span class="top-digit">${newD1}</span> − <span class="bottom-digit">${d2}</span> = <strong>${result}</strong>`;
+    borrowHelp.innerHTML = `Now we have enough! <span class="new-number">${newD1}</span> − ${d2} = <span class="new-number">${result}</span>`;
+
+    // Show result dots
+    borrowDots.innerHTML = '';
+    for (let i = 0; i < result; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'borrow-dot total-dot';
+        dot.style.animationDelay = `${i * 0.05}s`;
+        borrowDots.appendChild(dot);
+    }
+}
+
+// Helper to hide borrow visualization
+function hideBorrowVisualization() {
+    const borrowViz = document.getElementById('borrow-viz');
+    if (borrowViz) borrowViz.classList.remove('visible');
 }
 
 function animateBorrowDemo() {
@@ -1535,6 +1802,7 @@ function animateBorrowDemo() {
     }
 
     resetBorrowDemo();
+    hideBorrowVisualization();
 
     const { num1, num2, answer } = borrowDemoProblem;
     let workingNum1 = num1.toString().padStart(3, '0').split('').map(Number);
@@ -1543,27 +1811,30 @@ function animateBorrowDemo() {
 
     const steps = [];
 
-    // Build animation steps
+    // Build animation steps with kid-friendly language
     for (let col = 2; col >= 0; col--) {
         const d1 = workingNum1[col];
         const d2 = parseInt(str2[col]);
+
+        // Column name for kid-friendly explanation
+        const colName = col === 2 ? 'ones' : col === 1 ? 'tens' : 'hundreds';
 
         steps.push({
             type: 'highlight',
             col: col,
             d1: d1,
             d2: d2,
-            explanation: `<span class="step-number">${4 - col}</span> Subtract column: ${d1} - ${d2}`
+            explanation: `<span class="step-number">${4 - col}</span> Let's subtract the <strong>${colName}</strong>: ${d1} − ${d2}`
         });
 
         if (d1 < d2) {
-            // Need to borrow
+            // Need to borrow - show the problem
             steps.push({
-                type: 'borrow-needed',
+                type: 'show-problem',
                 col: col,
                 d1: d1,
                 d2: d2,
-                explanation: `${d1} is smaller than ${d2}! We need to <span class="borrow-text">borrow</span> from the next column.`
+                explanation: `Uh oh! <span class="borrow-text">${d1}</span> is smaller than <span class="borrow-text">${d2}</span>. We can't take ${d2} away from ${d1}!`
             });
 
             // Find column to borrow from
@@ -1574,8 +1845,19 @@ function animateBorrowDemo() {
 
             if (borrowCol >= 0) {
                 const oldVal = workingNum1[borrowCol];
+                const originalD1 = d1;
                 workingNum1[borrowCol]--;
                 workingNum1[col] += 10;
+
+                const borrowColName = borrowCol === 0 ? 'hundreds' : borrowCol === 1 ? 'tens' : 'ones';
+
+                steps.push({
+                    type: 'borrow-explain',
+                    col: col,
+                    d1: originalD1,
+                    d2: d2,
+                    explanation: `Let's <span class="borrow-text">borrow 10</span> from the ${borrowColName}! The ${borrowColName} gives us 10.`
+                });
 
                 steps.push({
                     type: 'borrow',
@@ -1583,19 +1865,20 @@ function animateBorrowDemo() {
                     toCol: col,
                     oldVal: oldVal,
                     newVal: oldVal - 1,
+                    originalD1: originalD1,
                     newD1: workingNum1[col],
-                    explanation: `Borrow 1 from the ${borrowCol === 0 ? 'hundreds' : borrowCol === 1 ? 'tens' : 'ones'} column: ${oldVal} becomes ${oldVal - 1}, and ${d1} becomes ${workingNum1[col]}`
+                    explanation: `The ${borrowColName} goes from <span class="borrow-text">${oldVal}</span> to <span class="borrow-text">${oldVal - 1}</span>. Our ${colName} get 10 more: ${originalD1} + 10 = <span class="highlight-text">${workingNum1[col]}</span>!`
                 });
             }
 
             const result = workingNum1[col] - d2;
             steps.push({
-                type: 'subtract',
+                type: 'subtract-after-borrow',
                 col: col,
                 d1: workingNum1[col],
                 d2: d2,
                 result: result,
-                explanation: `Now subtract: ${workingNum1[col]} - ${d2} = <span class="highlight-text">${result}</span>`
+                explanation: `Now we have enough! <span class="highlight-text">${workingNum1[col]}</span> − ${d2} = <span class="highlight-text">${result}</span>`
             });
         } else {
             const result = d1 - d2;
@@ -1605,15 +1888,18 @@ function animateBorrowDemo() {
                 d1: d1,
                 d2: d2,
                 result: result,
-                explanation: `${d1} - ${d2} = <span class="highlight-text">${result}</span>`
+                explanation: `${d1} − ${d2} = <span class="highlight-text">${result}</span>. Easy!`
             });
         }
     }
 
     steps.push({
         type: 'complete',
-        explanation: `Done! ${num1} - ${num2} = <strong>${answer}</strong>`
+        explanation: `All done! ${num1} − ${num2} = <strong>${answer}</strong>`
     });
+
+    // Initialize the timeline with the total number of steps
+    initTimeline('borrow', steps.length);
 
     let currentStep = 0;
     let displayNum1 = num1.toString().padStart(3, '0').split('');
@@ -1624,6 +1910,9 @@ function animateBorrowDemo() {
             borrowAnimationInterval = null;
             return;
         }
+
+        // Update timeline progress
+        updateTimeline('borrow', currentStep, steps.length);
 
         const s = steps[currentStep];
         document.getElementById('borrow-step-explanation').innerHTML = `<p>${s.explanation}</p>`;
@@ -1638,15 +1927,24 @@ function animateBorrowDemo() {
             case 'highlight':
                 document.getElementById(`borrow-num1-${s.col}`).classList.add('active');
                 document.getElementById(`borrow-num2-${s.col}`).classList.add('active');
+                hideBorrowVisualization();
                 break;
 
-            case 'borrow-needed':
+            case 'show-problem':
                 document.getElementById(`borrow-num1-${s.col}`).classList.add('highlight');
+                showBorrowProblem(s.d1, s.d2);
+                break;
+
+            case 'borrow-explain':
+                showBorrowNeeded(s.d1, s.d2);
                 break;
 
             case 'borrow':
-                // Show borrow animation
-                const borrowEl = document.getElementById(`borrow-from-${s.fromCol}`);
+                // Show borrow animation on the numbers
+                // Indicator indices are reversed: borrow-from-2 is above num1-0 (hundreds)
+                // So we need to map: fromCol 0->2, 1->1, 2->0
+                const borrowIndicatorIndex = 2 - s.fromCol;
+                const borrowEl = document.getElementById(`borrow-from-${borrowIndicatorIndex}`);
                 if (borrowEl) {
                     borrowEl.textContent = '-1';
                     borrowEl.classList.add('animate-down', 'visible');
@@ -1660,6 +1958,16 @@ function animateBorrowDemo() {
                 displayNum1[s.toCol] = s.newD1.toString();
                 document.getElementById(`borrow-num1-${s.toCol}`).innerHTML =
                     `<span class="new-value">${s.newD1}</span>`;
+
+                // Show the borrow visualization
+                showBorrowAdd(s.originalD1, s.newD1);
+                break;
+
+            case 'subtract-after-borrow':
+                document.getElementById(`borrow-ans-${s.col}`).textContent = s.result;
+                document.getElementById(`borrow-ans-${s.col}`).classList.add('digit-change');
+                showBorrowSubtract(s.d1, s.d2, s.result);
+                setTimeout(() => hideBorrowVisualization(), 1000);
                 break;
 
             case 'subtract':
@@ -1668,6 +1976,7 @@ function animateBorrowDemo() {
                 break;
 
             case 'complete':
+                hideBorrowVisualization();
                 celebrate();
                 break;
         }
