@@ -13,11 +13,150 @@ let practiceProblems = [];
 let currentPracticeIndex = 0;
 let practiceScore = 0;
 let currentPVQuiz = { number: 0, place: '', answer: 0 };
+let practiceType = 'mixed';
+
+// Session state (loaded from server)
+let sessionState = null;
+
+// ==========================================
+// Session State Management
+// ==========================================
+async function loadSessionState() {
+    try {
+        const response = await fetch('/api/state');
+        const data = await response.json();
+        if (data.success) {
+            sessionState = data.state;
+            updateUIFromState();
+        }
+    } catch (error) {
+        console.error('Failed to load session state:', error);
+    }
+}
+
+async function saveSessionState(updates) {
+    try {
+        const response = await fetch('/api/state', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates)
+        });
+        const data = await response.json();
+        if (data.success) {
+            sessionState = data.state;
+            updateUIFromState();
+        }
+    } catch (error) {
+        console.error('Failed to save session state:', error);
+    }
+}
+
+async function recordLessonVisit(lesson) {
+    try {
+        await fetch('/api/lesson/visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lesson })
+        });
+    } catch (error) {
+        console.error('Failed to record lesson visit:', error);
+    }
+}
+
+async function updateModuleProgress(module, updates) {
+    try {
+        const response = await fetch(`/api/progress/${module}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates)
+        });
+        const data = await response.json();
+        if (data.success && sessionState) {
+            sessionState[module] = data.data;
+            updateUIFromState();
+        }
+    } catch (error) {
+        console.error('Failed to update module progress:', error);
+    }
+}
+
+async function recordPracticeSession(correct, total, type) {
+    try {
+        const response = await fetch('/api/practice/record', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ correct, total, type })
+        });
+        const data = await response.json();
+        if (data.success && sessionState) {
+            sessionState.practice = data.practice;
+            sessionState.totalStars = data.totalStars;
+            updateUIFromState();
+            return data.starsEarned;
+        }
+    } catch (error) {
+        console.error('Failed to record practice session:', error);
+    }
+    return 0;
+}
+
+function updateUIFromState() {
+    if (!sessionState) return;
+
+    // Update star display in header
+    const starDisplay = document.getElementById('total-stars-display');
+    if (starDisplay) {
+        starDisplay.textContent = sessionState.totalStars || 0;
+    }
+
+    // Update welcome message with name
+    const welcomeH2 = document.querySelector('.welcome-card h2');
+    if (welcomeH2 && sessionState.userName) {
+        welcomeH2.innerHTML = `Welcome, ${sessionState.userName}! 🌟`;
+    }
+
+    // Update progress stats display
+    updateProgressDisplay();
+}
+
+function updateProgressDisplay() {
+    if (!sessionState) return;
+
+    const statsContainer = document.getElementById('progress-stats');
+    if (statsContainer) {
+        const practice = sessionState.practice || {};
+        const accuracy = practice.totalProblems > 0
+            ? Math.round((practice.totalCorrect / practice.totalProblems) * 100)
+            : 0;
+
+        statsContainer.innerHTML = `
+            <div class="stat-item">
+                <span class="stat-value">${practice.totalSessions || 0}</span>
+                <span class="stat-label">Sessions</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">${practice.totalProblems || 0}</span>
+                <span class="stat-label">Problems</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">${accuracy}%</span>
+                <span class="stat-label">Accuracy</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">${practice.bestScore || 0}%</span>
+                <span class="stat-label">Best Score</span>
+            </div>
+        `;
+    }
+}
 
 // ==========================================
 // Initialization
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load session state first
+    await loadSessionState();
+
     createStars();
     updatePlaceValues();
     updateMultVisual();
@@ -63,6 +202,11 @@ function showSection(sectionId) {
         }
     });
 
+    // Record lesson visit
+    if (sectionId !== 'home') {
+        recordLessonVisit(sectionId);
+    }
+
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -106,6 +250,11 @@ function updatePlaceValues() {
 
     // Update visual blocks
     updateBlocksVisual(thousands, hundreds, tens, ones);
+
+    // Track highest number explored
+    if (sessionState && num > (sessionState.numberPlaces?.highestNumber || 0)) {
+        updateModuleProgress('numberPlaces', { highestNumber: num });
+    }
 }
 
 function animateNumber(elementId, value) {
@@ -236,6 +385,15 @@ function checkPVAnswer(selected, button) {
             btn.classList.add('correct');
         }
     });
+
+    // Update session state
+    if (sessionState) {
+        const current = sessionState.numberPlaces || {};
+        updateModuleProgress('numberPlaces', {
+            questionsAttempted: (current.questionsAttempted || 0) + 1,
+            questionsCorrect: (current.questionsCorrect || 0) + (isCorrect ? 1 : 0)
+        });
+    }
 
     if (isCorrect) {
         feedback.textContent = '🎉 Correct! Great job!';
@@ -368,6 +526,23 @@ function checkStackedAnswer() {
         const feedback = document.getElementById('stacked-feedback');
         feedback.textContent = '🎉 Perfect! You got it right!';
         feedback.className = 'feedback success';
+
+        // Update session state
+        if (sessionState) {
+            const current = sessionState.stackedMath || {};
+            if (currentStackedOperation === 'addition') {
+                updateModuleProgress('stackedMath', {
+                    additionAttempted: (current.additionAttempted || 0) + 1,
+                    additionCorrect: (current.additionCorrect || 0) + 1
+                });
+            } else {
+                updateModuleProgress('stackedMath', {
+                    subtractionAttempted: (current.subtractionAttempted || 0) + 1,
+                    subtractionCorrect: (current.subtractionCorrect || 0) + 1
+                });
+            }
+        }
+
         celebrate();
     }
 }
@@ -456,6 +631,17 @@ function showTimesTable() {
         item.style.animationDelay = (i * 0.05) + 's';
         display.appendChild(item);
     }
+
+    // Track which tables have been viewed
+    if (sessionState) {
+        const current = sessionState.multiplication || {};
+        const tablesCompleted = current.tablesCompleted || [];
+        if (!tablesCompleted.includes(num)) {
+            updateModuleProgress('multiplication', {
+                tablesCompleted: [...tablesCompleted, num]
+            });
+        }
+    }
 }
 
 function newMultQuiz() {
@@ -476,10 +662,11 @@ function newMultQuiz() {
 function checkMultQuiz() {
     const userAnswer = parseInt(document.getElementById('mult-quiz-answer').value);
     const feedback = document.getElementById('mult-feedback');
+    const isCorrect = userAnswer === currentMultQuiz.answer;
 
     multQuizScore.total++;
 
-    if (userAnswer === currentMultQuiz.answer) {
+    if (isCorrect) {
         multQuizScore.correct++;
         feedback.textContent = '🎉 Correct! Amazing work!';
         feedback.className = 'feedback success';
@@ -487,6 +674,15 @@ function checkMultQuiz() {
     } else {
         feedback.textContent = `Not quite! ${currentMultQuiz.a} × ${currentMultQuiz.b} = ${currentMultQuiz.answer}`;
         feedback.className = 'feedback error';
+    }
+
+    // Update session state
+    if (sessionState) {
+        const current = sessionState.multiplication || {};
+        updateModuleProgress('multiplication', {
+            questionsAttempted: (current.questionsAttempted || 0) + 1,
+            questionsCorrect: (current.questionsCorrect || 0) + (isCorrect ? 1 : 0)
+        });
     }
 
     document.getElementById('mult-score').textContent = multQuizScore.correct;
@@ -592,10 +788,11 @@ function newDivQuiz() {
 function checkDivQuiz() {
     const userAnswer = parseInt(document.getElementById('div-quiz-answer').value);
     const feedback = document.getElementById('div-feedback');
+    const isCorrect = userAnswer === currentDivQuiz.answer;
 
     divQuizScore.total++;
 
-    if (userAnswer === currentDivQuiz.answer) {
+    if (isCorrect) {
         divQuizScore.correct++;
         feedback.textContent = '🎉 Correct! You\'re a division star!';
         feedback.className = 'feedback success';
@@ -603,6 +800,15 @@ function checkDivQuiz() {
     } else {
         feedback.textContent = `Not quite! ${currentDivQuiz.a} ÷ ${currentDivQuiz.b} = ${currentDivQuiz.answer}`;
         feedback.className = 'feedback error';
+    }
+
+    // Update session state
+    if (sessionState) {
+        const current = sessionState.division || {};
+        updateModuleProgress('division', {
+            questionsAttempted: (current.questionsAttempted || 0) + 1,
+            questionsCorrect: (current.questionsCorrect || 0) + (isCorrect ? 1 : 0)
+        });
     }
 
     document.getElementById('div-score').textContent = divQuizScore.correct;
@@ -622,6 +828,8 @@ async function startPractice() {
     const type = document.getElementById('practice-type').value;
     const difficulty = document.getElementById('practice-difficulty').value;
     const count = parseInt(document.getElementById('practice-count').value);
+
+    practiceType = type;
 
     // Generate problems
     if (type === 'mixed') {
@@ -779,7 +987,7 @@ function handlePracticeEnter(event) {
     }
 }
 
-function showPracticeResults() {
+async function showPracticeResults() {
     document.getElementById('practice-area').style.display = 'none';
     document.getElementById('practice-results').style.display = 'block';
 
@@ -789,6 +997,9 @@ function showPracticeResults() {
     document.getElementById('results-correct').textContent = practiceScore;
     document.getElementById('results-total').textContent = total;
     document.getElementById('results-percent').textContent = percent + '%';
+
+    // Record practice session and get stars earned
+    const starsEarned = await recordPracticeSession(practiceScore, total, practiceType);
 
     // Show stars based on score
     const starsContainer = document.getElementById('stars-earned');
@@ -803,6 +1014,11 @@ function showPracticeResults() {
         }
     }
     starsContainer.innerHTML = starsHtml;
+
+    // Show total stars earned message
+    if (starsEarned > 0) {
+        starsContainer.innerHTML += `<p style="font-size: 1rem; margin-top: 0.5rem;">+${starsEarned} stars earned!</p>`;
+    }
 
     // Update progress bar to 100%
     document.getElementById('practice-progress').style.width = '100%';

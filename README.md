@@ -14,18 +14,20 @@ An interactive math learning website designed for young children. Features color
 
 ### Prerequisites
 
-- Node.js 16.0.0 or higher
+- Bun (recommended) or Node.js 16.0.0+
 
 ### Installation
 
 ```bash
-npm install
+bun install
 ```
 
 ### Running the Application
 
 ```bash
-npm start
+bun start
+# or for development with auto-reload:
+bun run dev
 ```
 
 Then open http://localhost:3000 in your browser.
@@ -58,8 +60,21 @@ Then open http://localhost:3000 in your browser.
 - Customize number of problems
 - Track progress with stars and percentages
 
+## Progress Tracking
+
+Progress is automatically saved in session cookies:
+- Total stars earned
+- Practice session history (last 10 scores)
+- Module-specific progress (questions attempted/correct)
+- Lessons visited and completed
+- Best scores and accuracy
+
+Sessions persist for 30 days.
+
 ## Tech Stack
 
-- Node.js with Express
+- Bun runtime (Node.js compatible)
+- Express.js server
+- cookie-session for state management
 - Vanilla HTML, CSS, and JavaScript
 - No external frontend dependencies (lightweight and fast)
