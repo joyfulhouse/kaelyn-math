@@ -1554,8 +1554,8 @@ function displayCarryPractice() {
         ansRow.appendChild(input);
     }
 
-    // Reset carry inputs
-    for (let i = 0; i < 3; i++) {
+    // Reset carry inputs (4 boxes: ones, tens, hundreds, thousands)
+    for (let i = 0; i < 4; i++) {
         const inp = document.getElementById(`carry-input-${i}`);
         if (inp) {
             inp.value = '';
