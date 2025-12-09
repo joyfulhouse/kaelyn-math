@@ -143,18 +143,27 @@ function updateProgressDisplay() {
 // Initialization
 // ==========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // Load session state first
-    await loadSessionState();
+    // Load session state first (don't let it block initialization)
+    try {
+        await loadSessionState();
+    } catch (e) {
+        console.warn('Session state load failed, continuing...', e);
+    }
 
-    createStars();
-    updatePlaceValues();
-    updateMultVisual();
-    showTimesTable();
-    updateDivVisual();
-    newMultQuiz();
-    newDivQuiz();
-    newStackedProblem();
-    initCarryBorrowModules();
+    // Initialize all modules
+    try {
+        createStars();
+        updatePlaceValues();
+        updateMultVisual();
+        showTimesTable();
+        updateDivVisual();
+        newMultQuiz();
+        newDivQuiz();
+        newStackedProblem();
+        initCarryBorrowModules();
+    } catch (e) {
+        console.error('Module initialization error:', e);
+    }
 });
 
 // Create background stars
@@ -1163,20 +1172,29 @@ function newCarryDemo() {
 
 function displayCarryDemo() {
     const { num1, num2, answer } = carryDemoProblem;
+    console.log('displayCarryDemo called with:', { num1, num2, answer });
     const str1 = num1.toString().padStart(3, '0');
     const str2 = num2.toString().padStart(3, '0');
     const ansStr = answer.toString().padStart(4, '0');
 
     // Display num1
     for (let i = 0; i < 3; i++) {
-        document.getElementById(`demo-num1-${i}`).textContent = str1[i];
-        document.getElementById(`demo-num1-${i}`).className = 'demo-digit';
+        const el = document.getElementById(`demo-num1-${i}`);
+        if (el) {
+            el.textContent = str1[i];
+            el.className = 'demo-digit';
+        } else {
+            console.error(`Element demo-num1-${i} not found`);
+        }
     }
 
     // Display num2
     for (let i = 0; i < 3; i++) {
-        document.getElementById(`demo-num2-${i}`).textContent = str2[i];
-        document.getElementById(`demo-num2-${i}`).className = 'demo-digit';
+        const el = document.getElementById(`demo-num2-${i}`);
+        if (el) {
+            el.textContent = str2[i];
+            el.className = 'demo-digit';
+        }
     }
 
     // Clear answer and carries
@@ -2207,8 +2225,30 @@ function revealBorrowAnswer() {
 
 // Initialize new modules on page load
 function initCarryBorrowModules() {
-    newCarryDemo();
-    newCarryPractice();
-    newBorrowDemo();
-    newBorrowPractice();
+    console.log('Initializing carry/borrow modules...');
+    try {
+        newCarryDemo();
+        console.log('Carry demo initialized');
+    } catch (e) {
+        console.error('Carry demo init failed:', e);
+    }
+    try {
+        newCarryPractice();
+        console.log('Carry practice initialized');
+    } catch (e) {
+        console.error('Carry practice init failed:', e);
+    }
+    try {
+        newBorrowDemo();
+        console.log('Borrow demo initialized');
+    } catch (e) {
+        console.error('Borrow demo init failed:', e);
+    }
+    try {
+        newBorrowPractice();
+        console.log('Borrow practice initialized');
+    } catch (e) {
+        console.error('Borrow practice init failed:', e);
+    }
+    console.log('All carry/borrow modules initialized');
 }
