@@ -998,17 +998,100 @@ function renderPracticeStacked(problem) {
     const totalLen = Math.max(maxLen, answerLen);
 
     // Pad numbers to same length
-    const paddedNum1 = num1Str.padStart(totalLen, ' ');
-    const paddedNum2 = num2Str.padStart(totalLen, ' ');
+    const paddedNum1 = num1Str.padStart(totalLen, '0');
+    const paddedNum2 = num2Str.padStart(totalLen, '0');
 
-    // Render top number
+    // Calculate carries (addition) or borrows (subtraction)
+    const carries = [];
+    const borrows = [];
+    const adjustedNum1 = paddedNum1.split('').map(Number);
+
+    if (problem.type === 'addition') {
+        let carry = 0;
+        for (let i = totalLen - 1; i >= 0; i--) {
+            const d1 = parseInt(paddedNum1[i]) || 0;
+            const d2 = parseInt(paddedNum2[i]) || 0;
+            const sum = d1 + d2 + carry;
+            carry = sum >= 10 ? 1 : 0;
+            carries[i] = carry;
+        }
+    } else if (problem.type === 'subtraction') {
+        // Calculate borrows working right to left
+        for (let i = totalLen - 1; i >= 0; i--) {
+            const d1 = adjustedNum1[i];
+            const d2 = parseInt(paddedNum2[i]) || 0;
+            if (d1 < d2 && i > 0) {
+                // Need to borrow
+                borrows[i] = true;
+                adjustedNum1[i] += 10;
+                // Find next column to borrow from
+                let j = i - 1;
+                while (j >= 0 && adjustedNum1[j] === 0) {
+                    adjustedNum1[j] = 9;
+                    j--;
+                }
+                if (j >= 0) {
+                    adjustedNum1[j] -= 1;
+                }
+            }
+        }
+    }
+
+    // Render carry row (for addition)
+    const carryRow = document.getElementById('practice-carry-row');
+    carryRow.innerHTML = '';
+    for (let i = 0; i < totalLen; i++) {
+        const span = document.createElement('span');
+        span.className = 'carry-digit';
+        if (problem.type === 'addition' && carries[i + 1]) {
+            span.textContent = '1';
+            span.classList.add('visible');
+        }
+        carryRow.appendChild(span);
+    }
+
+    // Render top number with borrow annotations
     const num1Row = document.getElementById('practice-stacked-num1');
     num1Row.innerHTML = '';
-    for (const ch of paddedNum1) {
-        const span = document.createElement('span');
-        span.className = 'digit';
-        span.textContent = ch === ' ' ? '' : ch;
-        num1Row.appendChild(span);
+    for (let i = 0; i < totalLen; i++) {
+        const originalDigit = parseInt(paddedNum1[i]) || 0;
+        const adjustedDigit = adjustedNum1[i];
+        const wasBorrowedFrom = problem.type === 'subtraction' && originalDigit !== adjustedDigit && !borrows[i];
+        const didBorrow = problem.type === 'subtraction' && borrows[i];
+
+        const digitContainer = document.createElement('span');
+        digitContainer.className = 'digit-container';
+
+        if (wasBorrowedFrom) {
+            // Show crossed out original with new value
+            const crossedOut = document.createElement('span');
+            crossedOut.className = 'digit crossed-out';
+            crossedOut.textContent = originalDigit;
+            digitContainer.appendChild(crossedOut);
+
+            const newValue = document.createElement('span');
+            newValue.className = 'digit-adjusted';
+            newValue.textContent = adjustedDigit;
+            digitContainer.appendChild(newValue);
+        } else if (didBorrow) {
+            // Show the "1" prefix for borrowed column
+            const borrowIndicator = document.createElement('span');
+            borrowIndicator.className = 'borrow-indicator';
+            borrowIndicator.textContent = '1';
+            digitContainer.appendChild(borrowIndicator);
+
+            const digit = document.createElement('span');
+            digit.className = 'digit';
+            digit.textContent = originalDigit;
+            digitContainer.appendChild(digit);
+        } else {
+            const digit = document.createElement('span');
+            digit.className = 'digit';
+            digit.textContent = paddedNum1[i] === '0' && i === 0 ? '' : paddedNum1[i];
+            digitContainer.appendChild(digit);
+        }
+
+        num1Row.appendChild(digitContainer);
     }
 
     // Render second number with operator
@@ -1018,21 +1101,11 @@ function renderPracticeStacked(problem) {
     opSpan.className = 'operator';
     opSpan.textContent = problem.operator;
     num2Row.appendChild(opSpan);
-    for (const ch of paddedNum2) {
-        const span = document.createElement('span');
-        span.className = 'digit';
-        span.id = 'practice-num2-digit';
-        span.textContent = ch === ' ' ? '' : ch;
-        num2Row.appendChild(span);
-    }
-
-    // Render carry row (empty for input)
-    const carryRow = document.getElementById('practice-carry-row');
-    carryRow.innerHTML = '';
     for (let i = 0; i < totalLen; i++) {
         const span = document.createElement('span');
-        span.className = 'carry-digit';
-        carryRow.appendChild(span);
+        span.className = 'digit';
+        span.textContent = paddedNum2[i] === '0' && i === 0 ? '' : paddedNum2[i];
+        num2Row.appendChild(span);
     }
 
     // Render answer row with inputs
