@@ -922,8 +922,9 @@ body::before {
 
 .operator {
     position: absolute;
-    left: -32px;
+    left: -40px;
     font-weight: 600;
+    font-size: 1.5rem;
     color: var(--coral);
 }
 
