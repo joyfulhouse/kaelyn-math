@@ -751,7 +751,7 @@ function updateDivVisual() {
     for (let i = 0; i < groups; i++) {
         const group = document.createElement('div');
         group.className = 'div-group';
-        group.style.background = `linear-gradient(135deg, ${colors[i % colors.length]}88 0%, ${colors[(i + 1) % colors.length]}88 100%)`;
+        group.style.background = colors[i % colors.length] + '44';
 
         const label = document.createElement('div');
         label.className = 'div-group-label';
@@ -776,7 +776,7 @@ function updateDivVisual() {
     if (remainder > 0) {
         const remGroup = document.createElement('div');
         remGroup.className = 'div-group';
-        remGroup.style.background = 'linear-gradient(135deg, #dfe6e9 0%, #b2bec3 100%)';
+        remGroup.style.background = '#dfe6e944';
 
         const label = document.createElement('div');
         label.className = 'div-group-label';
