@@ -86,9 +86,10 @@ function calculateBorrowAdjustments(num1, num2, totalLen) {
  * @param {boolean[]} [options.borrows] - Which positions borrowed
  * @param {number[]} [options.adjusted] - Adjusted digits after borrowing
  * @param {boolean} [options.hideLeadingZeros] - Hide leading zeros
+ * @param {boolean} [options.showBorrowIndicators] - Show borrow indicators (default true)
  */
 function renderStackedNumberRow(container, num, totalLen, options = {}) {
-    const { borrows = [], adjusted = [], hideLeadingZeros = true } = options;
+    const { borrows = [], adjusted = [], hideLeadingZeros = true, showBorrowIndicators = true } = options;
     const numStr = num.toString().padStart(totalLen, '0');
     const digits = numStr.split('').map(Number);
 
@@ -104,12 +105,13 @@ function renderStackedNumberRow(container, num, totalLen, options = {}) {
         const digitContainer = document.createElement('span');
         digitContainer.className = 'digit-container';
 
-        if (wasBorrowedFrom) {
+        if (showBorrowIndicators && wasBorrowedFrom) {
             digitContainer.innerHTML = `
                 <span class="digit crossed-out">${originalDigit}</span>
                 <span class="digit-adjusted">${adjustedDigit}</span>
             `;
-        } else if (didBorrow) {
+        } else if (showBorrowIndicators && didBorrow) {
+            // Show "1" next to the digit (like "15" not "¹5")
             digitContainer.innerHTML = `
                 <span class="borrow-indicator">1</span>
                 <span class="digit">${originalDigit}</span>
@@ -123,6 +125,116 @@ function renderStackedNumberRow(container, num, totalLen, options = {}) {
 
         container.appendChild(digitContainer);
     }
+}
+
+/**
+ * Render an interactive number row for borrow practice
+ * User can click to initiate borrows
+ */
+function renderInteractiveBorrowRow(container, num, num2, totalLen, onBorrowCallback) {
+    const numStr = num.toString().padStart(totalLen, '0');
+    const num2Str = num2.toString().padStart(totalLen, '0');
+    const digits = numStr.split('').map(Number);
+    const digits2 = num2Str.split('').map(Number);
+
+    // Track current state
+    const state = {
+        displayDigits: [...digits],
+        borrowed: new Array(totalLen).fill(false),
+        receivedBorrow: new Array(totalLen).fill(false)
+    };
+
+    container.innerHTML = '';
+    container.dataset.borrowState = JSON.stringify(state);
+
+    for (let i = 0; i < totalLen; i++) {
+        const digitContainer = document.createElement('span');
+        digitContainer.className = 'digit-container';
+        digitContainer.dataset.index = i;
+
+        // Check if this digit can be borrowed from (has a column to the right that needs it)
+        const canBeBorrowedFrom = i < totalLen - 1 && digits[i] > 0;
+
+        if (canBeBorrowedFrom) {
+            digitContainer.classList.add('can-borrow');
+            digitContainer.onclick = () => handleBorrowClick(container, i, state, onBorrowCallback);
+        }
+
+        const digit = document.createElement('span');
+        digit.className = 'digit';
+        digit.textContent = digits[i];
+        digitContainer.appendChild(digit);
+
+        container.appendChild(digitContainer);
+    }
+
+    return state;
+}
+
+/**
+ * Handle click on a digit to borrow from it
+ */
+function handleBorrowClick(container, index, state, callback) {
+    const totalLen = state.displayDigits.length;
+
+    // Can only borrow if this digit > 0 and there's a column to the right
+    if (state.displayDigits[index] <= 0 || index >= totalLen - 1) return;
+
+    // Find the column that will receive the borrow (next column to the right)
+    const receiverIndex = index + 1;
+
+    // Decrease this digit by 1
+    state.displayDigits[index] -= 1;
+
+    // Mark as borrowed from and received
+    state.borrowed[index] = true;
+    state.receivedBorrow[receiverIndex] = true;
+
+    // Update the display
+    updateBorrowDisplay(container, state);
+
+    // Call callback if provided
+    if (callback) callback(index, receiverIndex, state);
+}
+
+/**
+ * Update the display after a borrow action
+ */
+function updateBorrowDisplay(container, state) {
+    const digitContainers = container.querySelectorAll('.digit-container');
+
+    digitContainers.forEach((dc, i) => {
+        dc.innerHTML = '';
+        dc.classList.remove('can-borrow', 'borrowed-from', 'received-borrow');
+
+        if (state.receivedBorrow[i]) {
+            // Show "1" prefix inline with the digit
+            dc.classList.add('received-borrow');
+            dc.innerHTML = `
+                <span class="borrow-indicator">1</span>
+                <span class="digit">${state.displayDigits[i]}</span>
+            `;
+        } else if (state.borrowed[i]) {
+            // Show crossed out original with new value above
+            const originalDigit = state.displayDigits[i] + 1;
+            dc.classList.add('borrowed-from');
+            dc.innerHTML = `
+                <span class="digit crossed-out">${originalDigit}</span>
+                <span class="digit-adjusted">${state.displayDigits[i]}</span>
+            `;
+        } else {
+            const digit = document.createElement('span');
+            digit.className = 'digit';
+            digit.textContent = state.displayDigits[i];
+            dc.appendChild(digit);
+
+            // Check if can still borrow from this position
+            if (state.displayDigits[i] > 0 && i < state.displayDigits.length - 1) {
+                dc.classList.add('can-borrow');
+                dc.onclick = () => handleBorrowClick(container, i, state, null);
+            }
+        }
+    });
 }
 
 /**
@@ -2358,12 +2470,9 @@ function displayBorrowPractice() {
     const { num1, num2, answer } = borrowPracticeProblem;
     const totalLen = 3;
 
-    // Calculate borrows using shared utility
-    const { borrows, adjusted } = calculateBorrowAdjustments(num1, num2, totalLen);
-
-    // Display num1 with borrow annotations using shared utility
+    // Display num1 as interactive (user clicks to borrow)
     const num1Row = document.getElementById('borrow-num1-row');
-    renderStackedNumberRow(num1Row, num1, totalLen, { borrows, adjusted, hideLeadingZeros: false });
+    borrowPracticeProblem.borrowState = renderInteractiveBorrowRow(num1Row, num1, num2, totalLen, null);
 
     // Display num2
     const str2 = num2.toString().padStart(totalLen, '0');
@@ -2391,9 +2500,10 @@ function displayBorrowPractice() {
         if (ind) ind.textContent = '';
     }
 
-    // Clear feedback
-    document.getElementById('borrow-feedback').innerHTML = '';
-    document.getElementById('borrow-feedback').className = 'feedback';
+    // Clear feedback and show hint
+    const feedback = document.getElementById('borrow-feedback');
+    feedback.innerHTML = '<small>💡 Click on a digit to borrow from it!</small>';
+    feedback.className = 'feedback';
 }
 
 function checkBorrowPractice() {

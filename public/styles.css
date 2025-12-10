@@ -928,26 +928,58 @@ body::before {
 .digit.crossed-out {
     text-decoration: line-through;
     color: var(--chocolate-muted);
-    font-size: 0.9em;
-    opacity: 0.6;
+    font-size: 0.85em;
+    opacity: 0.5;
 }
 
 .digit-adjusted {
     position: absolute;
-    top: -14px;
-    right: 2px;
-    font-size: 0.75rem;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--coral);
 }
 
 .borrow-indicator {
-    position: absolute;
-    top: -8px;
-    left: 0;
-    font-size: 0.7rem;
+    font-size: 0.85em;
     font-weight: 700;
     color: var(--coral);
+    margin-right: -2px;
+}
+
+.digit-container.can-borrow {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.digit-container.can-borrow:hover {
+    transform: scale(1.1);
+}
+
+.digit-container.can-borrow:hover .digit {
+    color: var(--coral);
+}
+
+.digit-container.borrowed-from .digit {
+    animation: shrinkDigit 0.3s ease-out;
+}
+
+.digit-container.received-borrow {
+    animation: receiveBorrow 0.3s ease-out;
+}
+
+@keyframes shrinkDigit {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.8); }
+    100% { transform: scale(1); }
+}
+
+@keyframes receiveBorrow {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); color: var(--coral); }
+    100% { transform: scale(1); }
 }
 
 .carry-digit {
