@@ -356,8 +356,23 @@ function newPlaceValueQuestion() {
     document.getElementById('pv-question').innerHTML =
         `What digit is in the <strong>${place}</strong> place in <strong>${num}</strong>?`;
 
-    // Generate options
+    // Generate options from digits in the number (more educational)
+    const numStr = num.toString().padStart(4, '0');
+    const digitsInNumber = [...new Set(numStr.split('').map(Number))];
+
+    // Start with the correct answer
     const options = [answer];
+
+    // Add other digits from the number as distractors
+    const otherDigits = digitsInNumber.filter(d => d !== answer);
+    otherDigits.sort(() => Math.random() - 0.5);
+
+    for (const d of otherDigits) {
+        if (options.length >= 4) break;
+        options.push(d);
+    }
+
+    // If we still need more options (number has < 4 unique digits), add random digits
     while (options.length < 4) {
         const opt = Math.floor(Math.random() * 10);
         if (!options.includes(opt)) {
