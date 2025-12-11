@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionState, setSessionState } from '@/lib/session';
 import { safeParseJson, apiError } from '@/lib/apiUtils';
+import { requireCsrf } from '@/lib/csrf';
 
 type ModuleKey = 'numberPlaces' | 'stackedMath' | 'multiplication' | 'division' | 'carryOver' | 'borrowing' | 'practice';
 
@@ -22,6 +23,9 @@ export async function POST(
   { params }: { params: Promise<{ module: string }> }
 ) {
   try {
+    const csrfError = await requireCsrf(request);
+    if (csrfError) return csrfError;
+
     const { module } = await params;
 
     if (!validModules.includes(module as ModuleKey)) {

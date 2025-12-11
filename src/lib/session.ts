@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import type { SessionState } from '@/types';
 import { getDefaultSessionState } from './sessionDefaults';
@@ -5,7 +6,50 @@ import { getDefaultSessionState } from './sessionDefaults';
 export { getDefaultSessionState };
 
 const SESSION_COOKIE_NAME = 'kaelyn-math-session';
+const SESSION_SIG_COOKIE_NAME = 'kaelyn-math-session-sig';
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
+const MAX_SESSION_BYTES = 3800; // stay under 4KB header limit
+const MAX_LESSON_ENTRIES = 50;
+const MAX_ACHIEVEMENTS = 50;
+const MAX_RECENT_SCORES = 10;
+
+let warnedAboutSecret = false;
+
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET || process.env.AUTH_SECRET || '';
+  if (!secret && !warnedAboutSecret) {
+    warnedAboutSecret = true;
+    console.warn('SESSION_SECRET is not set; session cookies cannot be strongly authenticated.');
+  }
+  return secret || 'development-session-secret';
+}
+
+function signPayload(payload: string): string {
+  return crypto.createHmac('sha256', getSessionSecret()).update(payload).digest('hex');
+}
+
+function isSignatureValid(payload: string, signature: string | undefined): boolean {
+  if (!signature) return false;
+  const expected = signPayload(payload);
+  try {
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  } catch {
+    return false;
+  }
+}
+
+function enforceSessionLimits(state: SessionState): SessionState {
+  return {
+    ...state,
+    lessonsVisited: state.lessonsVisited.slice(-MAX_LESSON_ENTRIES),
+    lessonsCompleted: state.lessonsCompleted.slice(-MAX_LESSON_ENTRIES),
+    achievements: state.achievements.slice(-MAX_ACHIEVEMENTS),
+    practice: {
+      ...state.practice,
+      recentScores: state.practice.recentScores.slice(-MAX_RECENT_SCORES),
+    },
+  };
+}
 
 /**
  * Get the current session state from cookies
@@ -13,14 +57,14 @@ const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 export async function getSessionState(): Promise<SessionState> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
+  const signatureCookie = cookieStore.get(SESSION_SIG_COOKIE_NAME);
 
-  if (sessionCookie?.value) {
+  if (sessionCookie?.value && signatureCookie?.value && isSignatureValid(sessionCookie.value, signatureCookie.value)) {
     try {
       const state = JSON.parse(sessionCookie.value) as SessionState;
-      return state;
+      return enforceSessionLimits(state);
     } catch {
-      // Invalid JSON, return default
-      return getDefaultSessionState();
+      // Invalid JSON, fall through to default
     }
   }
 
@@ -34,9 +78,29 @@ export async function setSessionState(state: SessionState): Promise<void> {
   const cookieStore = await cookies();
 
   // Update lastActive timestamp
-  state.lastActive = new Date().toISOString();
+  const limitedState = enforceSessionLimits({
+    ...state,
+    lastActive: new Date().toISOString(),
+  });
 
-  cookieStore.set(SESSION_COOKIE_NAME, JSON.stringify(state), {
+  let payload = JSON.stringify(limitedState);
+  if (payload.length > MAX_SESSION_BYTES) {
+    console.warn('Session payload exceeded size limit; resetting to defaults.');
+    const fallbackState = enforceSessionLimits(getDefaultSessionState());
+    payload = JSON.stringify(fallbackState);
+  }
+
+  const signature = signPayload(payload);
+
+  cookieStore.set(SESSION_COOKIE_NAME, payload, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: SESSION_MAX_AGE,
+    path: '/',
+  });
+
+  cookieStore.set(SESSION_SIG_COOKIE_NAME, signature, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -51,4 +115,5 @@ export async function setSessionState(state: SessionState): Promise<void> {
 export async function clearSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);
+  cookieStore.delete(SESSION_SIG_COOKIE_NAME);
 }

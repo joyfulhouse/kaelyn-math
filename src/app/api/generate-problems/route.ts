@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { generateProblems } from '@/lib/problemGenerators';
 import { safeParseJson, apiError } from '@/lib/apiUtils';
+import { requireCsrf } from '@/lib/csrf';
 import type { ProblemType, Difficulty } from '@/types';
 
 const VALID_TYPES: ProblemType[] = ['addition', 'subtraction', 'multiplication', 'division', 'mixed'];
@@ -12,6 +13,9 @@ const MAX_COUNT = 50;
  */
 export async function POST(request: Request) {
   try {
+    const csrfError = await requireCsrf(request);
+    if (csrfError) return csrfError;
+
     const body = await safeParseJson(request);
     if (!body) {
       return apiError('Invalid JSON body');

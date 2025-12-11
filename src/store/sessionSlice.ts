@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { getDefaultSessionState } from '@/lib/sessionDefaults';
+import { withCsrf } from '@/lib/csrfClient';
 import type { SessionState, ModuleProgress, PracticeSession } from '@/types';
 
 type LoadingStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -30,7 +31,7 @@ export const saveSessionState = createAsyncThunk(
   async (updates: Partial<SessionState>) => {
     const response = await fetch('/api/state', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: withCsrf({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ updates }),
     });
     const data = await response.json();
@@ -43,7 +44,7 @@ export const updateModuleProgress = createAsyncThunk(
   async ({ module, updates }: { module: string; updates: Partial<ModuleProgress> }) => {
     const response = await fetch(`/api/progress/${module}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: withCsrf({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ updates }),
     });
     const data = await response.json();
@@ -56,7 +57,7 @@ export const recordLessonVisit = createAsyncThunk(
   async (lesson: string) => {
     const response = await fetch('/api/lesson/visit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: withCsrf({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ lesson }),
     });
     const data = await response.json();
@@ -69,7 +70,7 @@ export const recordPracticeSession = createAsyncThunk(
   async ({ correct, total, type }: { correct: number; total: number; type: string }) => {
     const response = await fetch('/api/practice/record', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: withCsrf({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ correct, total, type }),
     });
     const data = await response.json();
@@ -86,7 +87,7 @@ export const addStars = createAsyncThunk(
   async (stars: number) => {
     const response = await fetch('/api/stars/add', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: withCsrf({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ stars }),
     });
     const data = await response.json();

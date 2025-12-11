@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getSessionState, setSessionState } from '@/lib/session';
 import { safeParseJson, apiError } from '@/lib/apiUtils';
+import { requireCsrf } from '@/lib/csrf';
 
 /**
  * POST /api/lesson/visit - Record a lesson visit
  */
 export async function POST(request: Request) {
   try {
+    const csrfError = await requireCsrf(request);
+    if (csrfError) return csrfError;
+
     const body = await safeParseJson(request);
     if (!body) {
       return apiError('Invalid JSON body');

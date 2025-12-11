@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionState, setSessionState } from '@/lib/session';
 import { safeParseJson, apiError } from '@/lib/apiUtils';
+import { ensureCsrfToken, requireCsrf } from '@/lib/csrf';
 import type { SessionState } from '@/types';
 
 /**
@@ -8,7 +9,10 @@ import type { SessionState } from '@/types';
  */
 export async function GET() {
   try {
+    await ensureCsrfToken();
     const state = await getSessionState();
+    // Re-sign and normalize the cookie on read
+    await setSessionState(state);
     return NextResponse.json({ success: true, state });
   } catch (error) {
     console.error('Error getting session state:', error);
@@ -21,6 +25,9 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
+    const csrfError = await requireCsrf(request);
+    if (csrfError) return csrfError;
+
     const body = await safeParseJson(request);
     if (!body) {
       return apiError('Invalid JSON body');
