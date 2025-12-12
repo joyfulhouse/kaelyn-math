@@ -1,6 +1,7 @@
 'use client';
 
 import { useAppSelector } from '@/hooks/useRedux';
+import { AudioToggle } from '@/components/common/AudioToggle';
 
 export function Header() {
   const totalStars = useAppSelector((state) => state.session.totalStars);
@@ -23,24 +24,30 @@ export function Header() {
           </h1>
         </div>
 
-        {/* Star Badge */}
-        <div className="flex items-center gap-2 rounded-full bg-cream/20 px-4 py-2 backdrop-blur-sm">
-          <svg
-            className="h-6 w-6"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-              fill="#FFD93D"
-              stroke="#E5B800"
-              strokeWidth="1"
-            />
-          </svg>
-          <span className="font-display text-lg font-bold text-cream">
-            {totalStars}
-          </span>
+        {/* Right side controls */}
+        <div className="flex items-center gap-3">
+          {/* Audio Toggle */}
+          <AudioToggle />
+
+          {/* Star Badge */}
+          <div className="flex items-center gap-2 rounded-full bg-cream/20 px-4 py-2 backdrop-blur-sm">
+            <svg
+              className="h-6 w-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                fill="#FFD93D"
+                stroke="#E5B800"
+                strokeWidth="1"
+              />
+            </svg>
+            <span className="font-display text-lg font-bold text-cream">
+              {totalStars}
+            </span>
+          </div>
         </div>
       </div>
     </header>

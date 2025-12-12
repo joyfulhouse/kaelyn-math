@@ -4,95 +4,126 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Kaelyn's Math Adventure is an interactive math learning website designed for young children. It features colorful animations, visual learning aids, and progressive practice modules for arithmetic fundamentals.
+Kaelyn's Math Adventure is an interactive math learning website for young children featuring colorful animations, visual learning aids, and progressive practice modules for arithmetic fundamentals.
 
 ## Commands
 
 ```bash
-# Install dependencies
-bun install
-
-# Run development server with auto-reload
-bun run dev
-
-# Run production server
-bun start
+bun install          # Install dependencies
+bun run dev          # Development server with hot reload (localhost:3000)
+bun run build        # Production build
+bun start            # Run production server
+bun run lint         # ESLint with Next.js TypeScript config
 ```
 
-The server runs on `http://localhost:3000` by default (configurable via `PORT` environment variable).
+Optional: `node test-math-audit.js` runs a Chrome DevTools-based smoke test capturing screenshots to `docs/screenshots/` (requires dev server on port 3030).
 
 ## Architecture
 
-### Server (`server.js`)
-Express.js server with cookie-session middleware for state persistence. Handles:
-- Static file serving from `public/`
-- Session state management APIs (`/api/state`, `/api/progress/:module`, etc.)
-- Problem generation API (`/api/generate-problems`)
+### Tech Stack
+- Next.js 16 with App Router
+- React 19 with TypeScript (strict mode)
+- Redux Toolkit for state management
+- Tailwind CSS v4 with CSS variable theming
 
-Session state persists for 30 days and tracks:
-- Module-specific progress (questions attempted/correct)
-- Practice session history and scores
-- Stars earned and achievements
-- Lessons visited/completed
+### Directory Structure
 
-### Frontend (`public/`)
-Single-page application with vanilla JavaScript:
-- `index.html` - Main layout with all learning modules as section elements
-- `app.js` - Application logic (~1800 lines) handling all modules, animations, and API calls
-- `styles.css` - CSS with CSS variables for theming and extensive animations
-
-### Learning Modules
-
-| Module | Section ID | Description |
-|--------|-----------|-------------|
-| Number Places | `number-places` | Place value visualization with interactive blocks |
-| Stacked Math | `stacked-math` | Vertical addition/subtraction with digit inputs |
-| Multiplication | `multiplication` | Visual grid, times tables, and quizzes |
-| Division | `division` | Sharing scenarios with visual grouping |
-| Carrying | `carry-over` | Step-by-step animated carry-over demos |
-| Borrowing | `borrowing` | Step-by-step animated borrowing demos |
-| Practice | `practice` | Configurable mixed practice sessions |
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes (state, progress, practice, etc.)
+│   ├── layout.tsx         # Root layout with Providers wrapper
+│   ├── page.tsx           # Main SPA with section switching
+│   └── globals.css        # Tailwind + CSS variable theme tokens
+├── components/
+│   ├── sections/          # Learning module sections (one per module)
+│   ├── math/              # Math visualization components
+│   ├── layout/            # Header, Navigation, FloatingShapes
+│   └── common/            # Reusable UI (Button, Card, Input, etc.)
+├── store/
+│   ├── sessionSlice.ts    # User progress, stars, achievements
+│   └── navigationSlice.ts # Active section state
+├── lib/
+│   ├── session.ts         # Signed cookie-based session persistence
+│   ├── csrf.ts            # Double-submit CSRF protection
+│   ├── mathUtils.ts       # Carry/borrow calculation utilities
+│   └── problemGenerators.ts # Quiz and problem generation
+├── hooks/                 # Typed Redux hooks (useAppSelector, useAppDispatch)
+└── types/                 # TypeScript interfaces and type definitions
+```
 
 ### State Flow
 
+The app uses a dual-layer state approach:
+
+1. **Client-side Redux** (`sessionSlice`, `navigationSlice`) for immediate UI updates
+2. **Server-side cookies** (signed JSON in httpOnly cookie) for persistence across sessions
+
 ```
-Frontend (app.js)
-    ├── loadSessionState() → GET /api/state
-    ├── saveSessionState() → POST /api/state
-    ├── updateModuleProgress() → POST /api/progress/:module
-    └── recordPracticeSession() → POST /api/practice/record
+User Action → Redux dispatch → Async thunk → API route → Cookie update
+                    ↓
+            Immediate UI update
 ```
 
-All state changes update UI immediately via `updateUIFromState()`.
+Session state persists for 30 days and includes per-module progress (questions attempted/correct, streaks), practice history, stars earned, and achievements.
+
+### Learning Modules
+
+| Section ID | Component | Description |
+|------------|-----------|-------------|
+| `home` | HomeSection | Landing page with module cards |
+| `number-places` | NumberPlacesSection | Place value visualization with blocks |
+| `stacked-math` | StackedMathSection | Vertical addition/subtraction |
+| `carry-over` | CarryOverSection | Animated step-by-step carrying demos |
+| `borrowing` | BorrowingSection | Animated borrowing with click-to-borrow |
+| `multiplication` | MultiplicationSection | Visual grids and times tables |
+| `division` | DivisionSection | Sharing scenarios with grouping visuals |
+| `practice` | PracticeSection | Configurable mixed practice sessions |
+
+### Problem Generation
+
+Problems are generated via `src/lib/problemGenerators.ts` with difficulty tiers:
+- **easy**: 1-10
+- **medium**: 10-100
+- **hard**: 100-1000
+
+Multiplication/division are capped at 12×12. Carry/borrow problems use iterative generation to ensure the operation is actually required.
+
+### Security
+
+- **CSRF**: Double-submit cookie pattern via `x-csrf-token` header matching cookie value
+- **Session signing**: HMAC-SHA256 signature cookie alongside session cookie
+- Requires `SESSION_SECRET` env var in production (falls back to dev secret)
 
 ## Key Patterns
 
-### Problem Generation
-Problems are generated client-side (`generateProblem()` in app.js) or server-side (`/api/generate-problems`). Both use the same difficulty tiers:
-- easy: 1-10
-- medium: 10-100
-- hard: 100-1000
+### Path Aliases
+Use `@/*` for imports (e.g., `@/components/common`, `@/lib/mathUtils`).
 
-Division/multiplication are capped at 12×12 for all difficulties.
+### Animation Cleanup
+Carry-over and borrowing modules use `setInterval` for step animations. Always clear intervals when unmounting or starting new animations.
 
-### Animation System
-The carry-over and borrowing modules use `setInterval`-based step animations stored in `carryAnimationInterval`/`borrowAnimationInterval`. Always clear these when starting a new animation or navigating away.
+### API Routes
+All state-mutating endpoints require CSRF validation via `requireCsrf()`. Response format is `{ success: boolean, ...data }`.
 
-### Session State Schema
-```javascript
-{
-  userName: string,
-  lessonsVisited: string[],
-  lessonsCompleted: string[],
-  numberPlaces: { questionsAttempted, questionsCorrect, highestNumber },
-  stackedMath: { additionAttempted, additionCorrect, subtractionAttempted, subtractionCorrect },
-  multiplication: { questionsAttempted, questionsCorrect, tablesCompleted: number[], bestStreak },
-  division: { questionsAttempted, questionsCorrect, bestStreak },
-  carryOver: { questionsAttempted, questionsCorrect, bestStreak },
-  borrowing: { questionsAttempted, questionsCorrect, bestStreak },
-  practice: { totalSessions, totalProblems, totalCorrect, bestScore, recentScores: object[] },
-  totalStars: number,
-  achievements: string[],
-  lastActive: ISO timestamp
-}
-```
+### Styling
+Uses Tailwind v4 with CSS variables defined in `globals.css`. Key color tokens: `--color-coral`, `--color-yellow`, `--color-sage`, `--color-sky`, `--color-cream` for the paper-craft aesthetic.
+
+## Coding Style
+
+- TypeScript strict mode; functional React components with hooks
+- `'use client'` directive required for client components
+- Two-space indentation; PascalCase for components/files, camelCase for functions/variables, UPPER_SNAKE for constants
+- Keep components side-effect free; move calculations to `src/lib`, state to `src/store`
+
+## Testing
+
+- Run `bun run lint` before pushing (baseline gate)
+- Manual QA: verify navigation between sections, session state persistence
+- For animation/layout changes: capture before/after screenshots via the audit script
+
+## Commits
+
+- Short imperative subjects (e.g., "Add interactive borrowing with click-to-borrow UI")
+- PRs include summary, linked issue, and screenshots for visual changes
+- List commands run (lint, dev smoke, audit) in PR body

@@ -17,6 +17,7 @@ interface StackedProblemProps {
   onDigitChange?: (index: number, value: string) => void;
   digitStates?: ('default' | 'correct' | 'incorrect' | 'highlighted')[];
   interactive?: boolean;
+  activeColumn?: number | null;
 }
 
 const operatorSymbols: Record<Operation, string> = {
@@ -35,6 +36,7 @@ export function StackedProblem({
   onDigitChange,
   digitStates = [],
   interactive = true,
+  activeColumn = null,
 }: StackedProblemProps) {
   const correctAnswer = operation === 'addition' ? num1 + num2 : num1 - num2;
 
@@ -61,28 +63,40 @@ export function StackedProblem({
         <div className="flex">{borrowRow}</div>
       ) : (
         <div className="flex">
-          {paddedNum1.split('').map((digit, i) => (
-            <div
-              key={`num1-${i}`}
-              className="flex h-12 w-12 items-center justify-center text-chocolate"
-            >
-              {digit}
-            </div>
-          ))}
+          {paddedNum1.split('').map((digit, i) => {
+            // Hide leading zeros
+            const isLeadingZero = digit === '0' && i < totalLength - num1.toString().length;
+            return (
+              <div
+                key={`num1-${i}`}
+                className={`flex h-12 w-12 items-center justify-center text-chocolate transition-all duration-200 ${
+                  activeColumn === i ? 'rounded-lg bg-sky/20' : ''
+                }`}
+              >
+                {isLeadingZero ? '' : digit}
+              </div>
+            );
+          })}
         </div>
       )}
 
       {/* Bottom number with operator */}
       <div className="flex items-center border-b-4 border-chocolate pb-2">
         <span className="mr-2 text-coral">{operatorSymbols[operation]}</span>
-        {paddedNum2.split('').map((digit, i) => (
-          <div
-            key={`num2-${i}`}
-            className="flex h-12 w-12 items-center justify-center text-chocolate"
-          >
-            {digit}
-          </div>
-        ))}
+        {paddedNum2.split('').map((digit, i) => {
+          // Hide leading zeros
+          const isLeadingZero = digit === '0' && i < totalLength - num2.toString().length;
+          return (
+            <div
+              key={`num2-${i}`}
+              className={`flex h-12 w-12 items-center justify-center text-chocolate transition-all duration-200 ${
+                activeColumn === i ? 'rounded-lg bg-sky/20' : ''
+              }`}
+            >
+              {isLeadingZero ? '' : digit}
+            </div>
+          );
+        })}
       </div>
 
       {/* Answer row */}
@@ -97,8 +111,8 @@ export function StackedProblem({
               {digit}
             </div>
           ))
-        ) : interactive ? (
-          // Interactive input boxes
+        ) : onDigitChange ? (
+          // Interactive or checked input boxes - show DigitInput when there's a change handler
           Array.from({ length: totalLength }).map((_, i) => {
             const state = digitStates[i] || 'default';
             return (
@@ -109,6 +123,7 @@ export function StackedProblem({
                 error={state === 'incorrect'}
                 success={state === 'correct'}
                 highlighted={state === 'highlighted'}
+                disabled={!interactive}
                 className="mx-0.5"
               />
             );

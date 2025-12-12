@@ -1,3 +1,4 @@
+export { AudioToggle } from './AudioToggle';
 export { Button } from './Button';
 export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './Card';
 export { Input, DigitInput } from './Input';
@@ -7,3 +8,4 @@ export { Feedback, AnswerFeedback } from './Feedback';
 export { ScoreBadge, StarDisplay } from './ScoreBadge';
 export { ProgressBar, StepProgress } from './ProgressBar';
 export { ErrorBoundary } from './ErrorBoundary';
+export { StepIcon, labelToIconType, type StepIconType } from './StepIcon';
