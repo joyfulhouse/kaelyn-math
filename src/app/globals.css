@@ -381,6 +381,30 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Hop animation */
+@keyframes hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Pulse scale */
+@keyframes pulseScale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
 /* ==========================================
    Animation Utility Classes
    ========================================== */
@@ -459,6 +483,18 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-blend-together {
   animation: blendTogether 0.8s ease-in-out forwards;
+}
+
+.animate-hop {
+  animation: hop 0.3s ease-in-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s ease-out forwards;
+}
+
+.animate-pulse-scale {
+  animation: pulseScale 1s ease-in-out infinite;
 }
 
 /* ==========================================
