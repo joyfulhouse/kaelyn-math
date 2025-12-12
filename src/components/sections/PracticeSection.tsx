@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Card, CardTitle, CardContent, Button, AnswerFeedback, ProgressBar, StarDisplay, StepIcon } from '@/components/common';
+import { MathToolbox } from '@/components/math';
 import { generateProblem } from '@/lib/problemGenerators';
 import { useAppDispatch } from '@/hooks/useRedux';
 import { recordPracticeSession } from '@/store/sessionSlice';
@@ -45,6 +46,7 @@ export function PracticeSection() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [results, setResults] = useState<boolean[]>([]);
   const [starsEarned, setStarsEarned] = useState(0);
+  const [showTools, setShowTools] = useState(false);
 
   // Helper to generate shuffled answer options for a problem
   const generateAnswerOptions = useCallback((problem: Problem): number[] => {
@@ -315,6 +317,36 @@ export function PracticeSection() {
                 <span className="font-display text-4xl text-chocolate">=</span>
                 <span className="font-display text-5xl font-bold text-chocolate/30">?</span>
               </div>
+
+              {/* Helper Tools Toggle */}
+              <button
+                onClick={() => { clickSound(); setShowTools(!showTools); }}
+                className={`
+                  flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all
+                  ${showTools
+                    ? 'bg-sky text-cream'
+                    : 'bg-cream text-chocolate/60 hover:bg-sky/10 hover:text-chocolate'
+                  }
+                `}
+                aria-expanded={showTools}
+                aria-label="Toggle helper tools"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+                </svg>
+                {showTools ? 'Hide Tools' : 'Need Help?'}
+              </button>
+
+              {/* Math Toolbox */}
+              {showTools && (
+                <div className="w-full max-w-lg">
+                  <MathToolbox
+                    num1={currentProblem.num1}
+                    num2={currentProblem.num2}
+                    operation={currentProblem.type}
+                  />
+                </div>
+              )}
 
               {/* Answer Options - large touch targets */}
               <div className="flex flex-wrap justify-center gap-4">
