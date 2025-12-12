@@ -35,10 +35,23 @@ export interface PracticeProgress {
   recentScores: PracticeSession[];
 }
 
+// Reading Progress Types
+export interface SightWordsProgress extends ModuleProgress {
+  wordsLearned: string[];
+  currentLevel: number;
+}
+
+export interface LettersProgress extends ModuleProgress {
+  lettersLearned: string[];
+  uppercaseComplete: boolean;
+  lowercaseComplete: boolean;
+}
+
 export interface SessionState {
   userName: string;
   lessonsVisited: string[];
   lessonsCompleted: string[];
+  // Math progress
   numberPlaces: NumberPlacesProgress;
   stackedMath: StackedMathProgress;
   multiplication: MultiplicationProgress;
@@ -46,6 +59,10 @@ export interface SessionState {
   carryOver: ModuleProgress;
   borrowing: ModuleProgress;
   practice: PracticeProgress;
+  // Reading progress
+  sightWords: SightWordsProgress;
+  letters: LettersProgress;
+  // Global
   totalStars: number;
   achievements: string[];
   lastActive: string;
@@ -87,16 +104,33 @@ export interface DivisionQuiz {
   answer: number;
 }
 
+// Subject Types
+export type SubjectId = 'math' | 'reading';
+
 // Navigation Types
 export type SectionId =
+  // Global
   | 'home'
+  // Math sections
   | 'number-places'
   | 'stacked-math'
   | 'carry-over'
   | 'borrowing'
   | 'multiplication'
   | 'division'
-  | 'practice';
+  | 'practice'
+  // Reading sections
+  | 'sight-words'
+  | 'letters';
+
+// Subject configuration
+export interface SubjectConfig {
+  id: SubjectId;
+  label: string;
+  icon: string;
+  color: string;
+  sections: SectionId[];
+}
 
 // Animation State
 export interface AnimationState {
@@ -128,6 +162,9 @@ export interface Score {
 
 // Place Value
 export type PlaceValue = 'thousands' | 'hundreds' | 'tens' | 'ones';
+
+// Re-export StepIconType from StepIcon component for convenience
+export type { StepIconType } from '@/components/common/StepIcon';
 
 export const PLACE_VALUES: PlaceValue[] = ['thousands', 'hundreds', 'tens', 'ones'];
 

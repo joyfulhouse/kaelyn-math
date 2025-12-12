@@ -1,4 +1,4 @@
-import type { SectionId } from '@/types';
+import type { SectionId, SubjectId, SubjectConfig } from '@/types';
 
 export interface NavItem {
   id: SectionId;
@@ -7,7 +7,26 @@ export interface NavItem {
   icon: string; // SVG path data
 }
 
-export const NAV_ITEMS: NavItem[] = [
+// Subject configurations
+export const SUBJECTS: SubjectConfig[] = [
+  {
+    id: 'math',
+    label: 'Math',
+    icon: 'M12 4v16m-8-8h16', // Plus sign
+    color: 'coral',
+    sections: ['home', 'number-places', 'stacked-math', 'carry-over', 'borrowing', 'multiplication', 'division', 'practice'],
+  },
+  {
+    id: 'reading',
+    label: 'Reading',
+    icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', // Book icon
+    color: 'sage',
+    sections: ['home', 'sight-words', 'letters'],
+  },
+];
+
+// Math navigation items
+export const MATH_NAV_ITEMS: NavItem[] = [
   {
     id: 'home',
     label: 'Home',
@@ -57,6 +76,36 @@ export const NAV_ITEMS: NavItem[] = [
     icon: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 18c3.314 0 6-2.686 6-6s-2.686-6-6-6-6 2.686-6 6 2.686 6 6 6zM12 14a2 2 0 100-4 2 2 0 000 4z',
   },
 ];
+
+// Reading navigation items
+export const READING_NAV_ITEMS: NavItem[] = [
+  {
+    id: 'home',
+    label: 'Home',
+    shortLabel: 'Home',
+    icon: 'M3 12L12 3L21 12V21H15V15H9V21H3V12Z',
+  },
+  {
+    id: 'sight-words',
+    label: 'Sight Words',
+    shortLabel: 'Words',
+    icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z',
+  },
+  {
+    id: 'letters',
+    label: 'Letters & ABC',
+    shortLabel: 'ABC',
+    icon: 'M3 7h4l3 10h4l3-10h4M7 12h10',
+  },
+];
+
+// Legacy export for backwards compatibility
+export const NAV_ITEMS = MATH_NAV_ITEMS;
+
+// Get navigation items for a specific subject
+export function getNavItemsForSubject(subjectId: SubjectId): NavItem[] {
+  return subjectId === 'math' ? MATH_NAV_ITEMS : READING_NAV_ITEMS;
+}
 
 export const DIFFICULTY_OPTIONS = [
   { value: 'easy', label: 'Easy (1-10)' },

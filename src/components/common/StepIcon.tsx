@@ -13,7 +13,11 @@ export type StepIconType =
   | 'add'
   | 'subtract'
   | 'multiply'
-  | 'divide';
+  | 'divide'
+  // Reading icons
+  | 'word'
+  | 'letter'
+  | 'book';
 
 interface StepIconProps {
   type: StepIconType;
@@ -133,6 +137,28 @@ export function StepIcon({ type, size = 'md', className = '' }: StepIconProps) {
         <circle cx="12" cy="18" r="2" />
       </svg>
     ),
+
+    // Eye icon for "Word" - sight words
+    word: (
+      <svg className={`${sizeClass} ${className}`} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+    ),
+
+    // ABC letters for "Letter"
+    letter: (
+      <svg className={`${sizeClass} ${className}`} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" />
+      </svg>
+    ),
+
+    // Open book for "Book"
+    book: (
+      <svg className={`${sizeClass} ${className}`} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z" />
+      </svg>
+    ),
   };
 
   return icons[type] || null;
@@ -158,6 +184,13 @@ export function labelToIconType(label: string): StepIconType {
     subtraction: 'subtract',
     multiplication: 'multiply',
     division: 'divide',
+    // Reading mappings
+    word: 'word',
+    letter: 'letter',
+    book: 'book',
+    'sight-words': 'word',
+    letters: 'letter',
+    reading: 'book',
   };
 
   return labelMap[label.toLowerCase()] || 'start';

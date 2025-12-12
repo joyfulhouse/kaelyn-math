@@ -49,6 +49,22 @@ export function getDefaultSessionState(): SessionState {
       bestScore: 0,
       recentScores: [],
     },
+    // Reading progress
+    sightWords: {
+      questionsAttempted: 0,
+      questionsCorrect: 0,
+      bestStreak: 0,
+      wordsLearned: [],
+      currentLevel: 1,
+    },
+    letters: {
+      questionsAttempted: 0,
+      questionsCorrect: 0,
+      bestStreak: 0,
+      lettersLearned: [],
+      uppercaseComplete: false,
+      lowercaseComplete: false,
+    },
     totalStars: 0,
     achievements: [],
     lastActive: new Date().toISOString(),

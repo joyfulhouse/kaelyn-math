@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Header, Navigation, FloatingShapes } from '@/components/layout';
+import { Header, SubjectTabs, Navigation, FloatingShapes } from '@/components/layout';
 import { ErrorBoundary } from '@/components/common';
 import {
   HomeSection,
@@ -12,13 +12,17 @@ import {
   MultiplicationSection,
   DivisionSection,
   PracticeSection,
+  SightWordsSection,
+  LettersSection,
 } from '@/components/sections';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { loadSessionState } from '@/store/sessionSlice';
 import type { SectionId } from '@/types';
 
 const sectionComponents: Record<SectionId, React.ComponentType> = {
+  // Global
   home: HomeSection,
+  // Math sections
   'number-places': NumberPlacesSection,
   'stacked-math': StackedMathSection,
   'carry-over': CarryOverSection,
@@ -26,6 +30,9 @@ const sectionComponents: Record<SectionId, React.ComponentType> = {
   multiplication: MultiplicationSection,
   division: DivisionSection,
   practice: PracticeSection,
+  // Reading sections
+  'sight-words': SightWordsSection,
+  letters: LettersSection,
 };
 
 export default function Home() {
@@ -45,6 +52,7 @@ export default function Home() {
     <div className="min-h-screen bg-cream">
       <FloatingShapes />
       <Header />
+      <SubjectTabs />
       <Navigation />
 
       <main className="relative z-10 mx-auto max-w-6xl px-4 py-8">

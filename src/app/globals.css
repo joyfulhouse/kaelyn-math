@@ -118,6 +118,16 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-fredoka), 'Fredoka', sans-serif;
 }
 
+/* Scrollbar Hiding Utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
+
 /* Screen Reader Only */
 .sr-only {
   position: absolute;

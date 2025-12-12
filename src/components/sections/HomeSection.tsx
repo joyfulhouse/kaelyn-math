@@ -5,17 +5,18 @@ import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { setActiveSection } from '@/store/navigationSlice';
 import { Card, StepIcon } from '@/components/common';
 import { useAudio } from '@/hooks/useAudio';
-import type { SectionId } from '@/types';
+import type { SectionId, StepIconType } from '@/types';
 
 interface ModuleCard {
   id: SectionId;
-  iconType: 'ones' | 'tens' | 'hundreds' | 'thousands' | 'add' | 'subtract' | 'multiply' | 'divide' | 'carry' | 'borrow' | 'check' | 'start';
+  iconType: StepIconType;
   narration: string;
   color: string;
   bgColor: string;
 }
 
-const modules: ModuleCard[] = [
+// Math modules
+const mathModules: ModuleCard[] = [
   {
     id: 'number-places',
     iconType: 'hundreds',
@@ -67,20 +68,43 @@ const modules: ModuleCard[] = [
   },
 ];
 
+// Reading modules
+const readingModules: ModuleCard[] = [
+  {
+    id: 'sight-words',
+    iconType: 'word',
+    narration: 'Sight Words! Learn words you see every day!',
+    color: 'text-sage',
+    bgColor: 'bg-sage',
+  },
+  {
+    id: 'letters',
+    iconType: 'letter',
+    narration: 'Letters! Learn A-B-C and letter sounds!',
+    color: 'text-sky',
+    bgColor: 'bg-sky',
+  },
+];
+
 export function HomeSection() {
   const dispatch = useAppDispatch();
   const { speak, clickSound } = useAudio();
   const userName = useAppSelector((state) => state.session.userName);
   const totalStars = useAppSelector((state) => state.session.totalStars);
   const lessonsCompleted = useAppSelector((state) => state.session.lessonsCompleted);
+  const activeSubject = useAppSelector((state) => state.navigation.activeSubject);
 
-  // Greet on mount
+  // Get modules for current subject
+  const modules = activeSubject === 'math' ? mathModules : readingModules;
+  const subjectLabel = activeSubject === 'math' ? 'math' : 'reading';
+
+  // Greet on mount or subject change
   useEffect(() => {
     const timer = setTimeout(() => {
-      speak(`Hi ${userName}! Let's learn math!`);
+      speak(`Hi ${userName}! Let's learn ${subjectLabel}!`);
     }, 500);
     return () => clearTimeout(timer);
-  }, [userName, speak]);
+  }, [userName, speak, subjectLabel]);
 
   const handleModuleClick = (module: ModuleCard) => {
     clickSound();
@@ -106,9 +130,9 @@ export function HomeSection() {
               <rect x="65" y="85" width="70" height="45" rx="4" fill="#F5F5F5" />
               {/* Math on board - just visual symbols */}
               <circle cx="82" cy="107" r="6" fill="#FF7F6B" />
-              <text x="96" y="112" className="fill-chocolate font-display text-lg">+</text>
+              <text x="96" y="112" fill="#4A3728" style={{ fontFamily: 'Fredoka, sans-serif', fontSize: '18px', fontWeight: 600 }}>+</text>
               <circle cx="110" cy="107" r="6" fill="#7EB5D6" />
-              <text x="124" y="112" className="fill-chocolate font-display text-lg">=</text>
+              <text x="124" y="112" fill="#4A3728" style={{ fontFamily: 'Fredoka, sans-serif', fontSize: '18px', fontWeight: 600 }}>=</text>
               <circle cx="78" cy="118" r="3" fill="#FFD93D" />
               <circle cx="86" cy="118" r="3" fill="#FFD93D" />
               <circle cx="94" cy="118" r="3" fill="#FFD93D" />

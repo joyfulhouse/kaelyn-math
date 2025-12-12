@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { getDefaultSessionState } from '@/lib/sessionDefaults';
 import { withCsrf } from '@/lib/csrfClient';
-import type { SessionState, ModuleProgress, PracticeSession } from '@/types';
+import type { SessionState, ModuleProgress, PracticeSession, SightWordsProgress, LettersProgress } from '@/types';
 
 type LoadingStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
 
@@ -133,6 +133,23 @@ const sessionSlice = createSlice({
     updatePractice: (state, action: PayloadAction<Partial<typeof initialState.practice>>) => {
       state.practice = { ...state.practice, ...action.payload };
     },
+    // Reading progress reducers
+    updateSightWords: (state, action: PayloadAction<Partial<SightWordsProgress>>) => {
+      state.sightWords = { ...state.sightWords, ...action.payload };
+    },
+    updateLetters: (state, action: PayloadAction<Partial<LettersProgress>>) => {
+      state.letters = { ...state.letters, ...action.payload };
+    },
+    addWordLearned: (state, action: PayloadAction<string>) => {
+      if (!state.sightWords.wordsLearned.includes(action.payload)) {
+        state.sightWords.wordsLearned.push(action.payload);
+      }
+    },
+    addLetterLearned: (state, action: PayloadAction<string>) => {
+      if (!state.letters.lettersLearned.includes(action.payload)) {
+        state.letters.lettersLearned.push(action.payload);
+      }
+    },
     addPracticeSession: (state, action: PayloadAction<PracticeSession>) => {
       state.practice.recentScores.unshift(action.payload);
       if (state.practice.recentScores.length > 10) {
@@ -193,6 +210,10 @@ export const {
   updateCarryOver,
   updateBorrowing,
   updatePractice,
+  updateSightWords,
+  updateLetters,
+  addWordLearned,
+  addLetterLearned,
   addPracticeSession,
   setTotalStars,
   addAchievement,
