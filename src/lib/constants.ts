@@ -14,14 +14,14 @@ export const SUBJECTS: SubjectConfig[] = [
     label: 'Math',
     icon: 'M12 4v16m-8-8h16', // Plus sign
     color: 'coral',
-    sections: ['home', 'number-places', 'stacked-math', 'carry-over', 'borrowing', 'multiplication', 'division', 'practice'],
+    sections: ['home', 'number-places', 'stacked-math', 'carry-over', 'borrowing', 'multiplication', 'division', 'sets-pairs', 'practice'],
   },
   {
     id: 'reading',
     label: 'Reading',
     icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', // Book icon
     color: 'sage',
-    sections: ['home', 'sight-words', 'letters'],
+    sections: ['home', 'sight-words', 'letters', 'phonics'],
   },
 ];
 
@@ -70,6 +70,12 @@ export const MATH_NAV_ITEMS: NavItem[] = [
     icon: 'M12 6a2 2 0 100-4 2 2 0 000 4zM5 12h14M12 18a2 2 0 100 4 2 2 0 000-4z',
   },
   {
+    id: 'sets-pairs',
+    label: 'Sets & Pairs',
+    shortLabel: 'Sets',
+    icon: 'M4 4h6v6H4zM14 4h6v6h-6zM9 14h6v6H9z',
+  },
+  {
     id: 'practice',
     label: 'Practice',
     shortLabel: 'Practice',
@@ -96,6 +102,12 @@ export const READING_NAV_ITEMS: NavItem[] = [
     label: 'Letters & ABC',
     shortLabel: 'ABC',
     icon: 'M3 7h4l3 10h4l3-10h4M7 12h10',
+  },
+  {
+    id: 'phonics',
+    label: 'Phonics',
+    shortLabel: 'Phonics',
+    icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z',
   },
 ];
 

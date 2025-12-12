@@ -11,9 +11,11 @@ import {
   BorrowingSection,
   MultiplicationSection,
   DivisionSection,
+  SetsPairsSection,
   PracticeSection,
   SightWordsSection,
   LettersSection,
+  PhonicsSection,
 } from '@/components/sections';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { loadSessionState } from '@/store/sessionSlice';
@@ -29,10 +31,12 @@ const sectionComponents: Record<SectionId, React.ComponentType> = {
   borrowing: BorrowingSection,
   multiplication: MultiplicationSection,
   division: DivisionSection,
+  'sets-pairs': SetsPairsSection,
   practice: PracticeSection,
   // Reading sections
   'sight-words': SightWordsSection,
   letters: LettersSection,
+  phonics: PhonicsSection,
 };
 
 export default function Home() {

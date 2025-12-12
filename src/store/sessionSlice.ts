@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { getDefaultSessionState } from '@/lib/sessionDefaults';
 import { withCsrf } from '@/lib/csrfClient';
-import type { SessionState, ModuleProgress, PracticeSession, SightWordsProgress, LettersProgress } from '@/types';
+import type { SessionState, ModuleProgress, PracticeSession, SightWordsProgress, LettersProgress, PhonicsProgress } from '@/types';
 
 type LoadingStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
 
@@ -130,6 +130,9 @@ const sessionSlice = createSlice({
     updateBorrowing: (state, action: PayloadAction<Partial<ModuleProgress>>) => {
       state.borrowing = { ...state.borrowing, ...action.payload };
     },
+    updateSetsPairs: (state, action: PayloadAction<Partial<ModuleProgress>>) => {
+      state.setsPairs = { ...state.setsPairs, ...action.payload };
+    },
     updatePractice: (state, action: PayloadAction<Partial<typeof initialState.practice>>) => {
       state.practice = { ...state.practice, ...action.payload };
     },
@@ -148,6 +151,25 @@ const sessionSlice = createSlice({
     addLetterLearned: (state, action: PayloadAction<string>) => {
       if (!state.letters.lettersLearned.includes(action.payload)) {
         state.letters.lettersLearned.push(action.payload);
+      }
+    },
+    // Phonics progress reducers
+    updatePhonics: (state, action: PayloadAction<Partial<PhonicsProgress>>) => {
+      state.phonics = { ...state.phonics, ...action.payload };
+    },
+    addPhonemeLearned: (state, action: PayloadAction<string>) => {
+      if (!state.phonics.phonemesLearned.includes(action.payload)) {
+        state.phonics.phonemesLearned.push(action.payload);
+      }
+    },
+    addWordBlended: (state, action: PayloadAction<string>) => {
+      if (!state.phonics.wordsBlended.includes(action.payload)) {
+        state.phonics.wordsBlended.push(action.payload);
+      }
+    },
+    markPhonicsUnitComplete: (state, action: PayloadAction<number>) => {
+      if (!state.phonics.unitsCompleted.includes(action.payload)) {
+        state.phonics.unitsCompleted.push(action.payload);
       }
     },
     addPracticeSession: (state, action: PayloadAction<PracticeSession>) => {
@@ -209,11 +231,16 @@ export const {
   updateDivision,
   updateCarryOver,
   updateBorrowing,
+  updateSetsPairs,
   updatePractice,
   updateSightWords,
   updateLetters,
   addWordLearned,
   addLetterLearned,
+  updatePhonics,
+  addPhonemeLearned,
+  addWordBlended,
+  markPhonicsUnitComplete,
   addPracticeSession,
   setTotalStars,
   addAchievement,

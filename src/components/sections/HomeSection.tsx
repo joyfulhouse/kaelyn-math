@@ -84,6 +84,13 @@ const readingModules: ModuleCard[] = [
     color: 'text-sky',
     bgColor: 'bg-sky',
   },
+  {
+    id: 'phonics',
+    iconType: 'phonics',
+    narration: 'Phonics! Learn to sound out words!',
+    color: 'text-coral',
+    bgColor: 'bg-coral',
+  },
 ];
 
 export function HomeSection() {

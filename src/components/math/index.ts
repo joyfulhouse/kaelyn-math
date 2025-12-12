@@ -11,3 +11,5 @@ export { SumVisualization, BorrowVisualization } from './SumVisualization';
 export { NumberLine } from './NumberLine';
 export { CountingBlocks } from './CountingBlocks';
 export { MathToolbox } from './MathToolbox';
+// Sets and Pairs
+export { SetVisual, PairingVisual, SetComparison } from './SetVisual';

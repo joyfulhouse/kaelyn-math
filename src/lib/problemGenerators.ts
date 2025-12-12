@@ -1,4 +1,4 @@
-import type { Problem, Difficulty, ProblemType, PlaceValueQuiz, MultiplicationQuiz, DivisionQuiz } from '@/types';
+import type { Problem, Difficulty, ProblemType, PlaceValueQuiz, MultiplicationQuiz, DivisionQuiz, SetsQuiz, PairsQuiz, CompareQuiz } from '@/types';
 import { needsCarry, needsBorrow } from './mathUtils';
 
 /**
@@ -266,6 +266,126 @@ export function generateDivisionQuiz(): DivisionQuiz {
   return {
     total,
     groups,
+    answer,
+  };
+}
+
+/**
+ * Fisher-Yates shuffle helper
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+/**
+ * Generate a sets quiz question (count sets, items per set, or total)
+ */
+export function generateSetsQuiz(): SetsQuiz {
+  const numSets = randomInRange(2, 6);
+  const itemsPerSet = randomInRange(2, 8);
+  const total = numSets * itemsPerSet;
+
+  // Randomly choose question type
+  const questionTypes: SetsQuiz['questionType'][] = ['find-total', 'find-sets', 'find-items'];
+  const questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+
+  // Generate answer based on question type
+  let answer: number;
+  switch (questionType) {
+    case 'find-total':
+      answer = total;
+      break;
+    case 'find-sets':
+      answer = numSets;
+      break;
+    case 'find-items':
+      answer = itemsPerSet;
+      break;
+  }
+
+  // Generate options including the correct answer
+  const optionsSet = new Set<number>([answer]);
+
+  // Add plausible wrong answers
+  while (optionsSet.size < 4) {
+    let wrongAnswer: number;
+    if (questionType === 'find-total') {
+      // Wrong totals: ±1-3 from correct, or numSets + itemsPerSet
+      const offsets = [-3, -2, -1, 1, 2, 3, numSets + itemsPerSet - total];
+      wrongAnswer = total + offsets[Math.floor(Math.random() * offsets.length)];
+    } else {
+      // Wrong counts: ±1-2 from correct
+      wrongAnswer = answer + randomInRange(-2, 2);
+    }
+    if (wrongAnswer > 0 && wrongAnswer !== answer) {
+      optionsSet.add(wrongAnswer);
+    }
+  }
+
+  return {
+    numSets,
+    itemsPerSet,
+    total,
+    questionType,
+    options: shuffleArray([...optionsSet]),
+  };
+}
+
+/**
+ * Generate a pairs/even-odd quiz question
+ */
+export function generatePairsQuiz(): PairsQuiz {
+  const number = randomInRange(1, 20);
+  const isEven = number % 2 === 0;
+  const numPairs = Math.floor(number / 2);
+  const leftover = number % 2;
+
+  return {
+    number,
+    isEven,
+    numPairs,
+    leftover,
+  };
+}
+
+/**
+ * Generate a comparison quiz question (more/fewer/same)
+ */
+export function generateCompareQuiz(): CompareQuiz {
+  // Ensure variety: sometimes equal, sometimes different
+  const shouldBeEqual = Math.random() < 0.25; // 25% chance of equal sets
+
+  let setA: number;
+  let setB: number;
+
+  if (shouldBeEqual) {
+    setA = randomInRange(2, 10);
+    setB = setA;
+  } else {
+    setA = randomInRange(2, 10);
+    // Ensure setB is different from setA
+    do {
+      setB = randomInRange(2, 10);
+    } while (setB === setA);
+  }
+
+  let answer: CompareQuiz['answer'];
+  if (setA > setB) {
+    answer = 'more';
+  } else if (setA < setB) {
+    answer = 'fewer';
+  } else {
+    answer = 'same';
+  }
+
+  return {
+    setA,
+    setB,
     answer,
   };
 }

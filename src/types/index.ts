@@ -47,6 +47,13 @@ export interface LettersProgress extends ModuleProgress {
   lowercaseComplete: boolean;
 }
 
+export interface PhonicsProgress extends ModuleProgress {
+  phonemesLearned: string[];
+  wordsBlended: string[];
+  currentUnit: number;
+  unitsCompleted: number[];
+}
+
 export interface SessionState {
   userName: string;
   lessonsVisited: string[];
@@ -58,10 +65,12 @@ export interface SessionState {
   division: ModuleProgress;
   carryOver: ModuleProgress;
   borrowing: ModuleProgress;
+  setsPairs: ModuleProgress;
   practice: PracticeProgress;
   // Reading progress
   sightWords: SightWordsProgress;
   letters: LettersProgress;
+  phonics: PhonicsProgress;
   // Global
   totalStars: number;
   achievements: string[];
@@ -104,6 +113,28 @@ export interface DivisionQuiz {
   answer: number;
 }
 
+// Sets and Pairs Quiz Types
+export interface SetsQuiz {
+  numSets: number;
+  itemsPerSet: number;
+  total: number;
+  questionType: 'find-total' | 'find-sets' | 'find-items';
+  options: number[];
+}
+
+export interface PairsQuiz {
+  number: number;
+  isEven: boolean;
+  numPairs: number;
+  leftover: number;
+}
+
+export interface CompareQuiz {
+  setA: number;
+  setB: number;
+  answer: 'more' | 'fewer' | 'same';
+}
+
 // Subject Types
 export type SubjectId = 'math' | 'reading';
 
@@ -118,10 +149,12 @@ export type SectionId =
   | 'borrowing'
   | 'multiplication'
   | 'division'
+  | 'sets-pairs'
   | 'practice'
   // Reading sections
   | 'sight-words'
-  | 'letters';
+  | 'letters'
+  | 'phonics';
 
 // Subject configuration
 export interface SubjectConfig {

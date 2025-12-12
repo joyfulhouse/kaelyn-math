@@ -42,6 +42,11 @@ export function getDefaultSessionState(): SessionState {
       questionsCorrect: 0,
       bestStreak: 0,
     },
+    setsPairs: {
+      questionsAttempted: 0,
+      questionsCorrect: 0,
+      bestStreak: 0,
+    },
     practice: {
       totalSessions: 0,
       totalProblems: 0,
@@ -64,6 +69,15 @@ export function getDefaultSessionState(): SessionState {
       lettersLearned: [],
       uppercaseComplete: false,
       lowercaseComplete: false,
+    },
+    phonics: {
+      questionsAttempted: 0,
+      questionsCorrect: 0,
+      bestStreak: 0,
+      phonemesLearned: [],
+      wordsBlended: [],
+      currentUnit: 1,
+      unitsCompleted: [],
     },
     totalStars: 0,
     achievements: [],
