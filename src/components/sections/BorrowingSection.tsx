@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Card, CardTitle, CardContent, Button, AnswerFeedback } from '@/components/common';
+import { Card, CardTitle, CardContent, Button, AnswerFeedback, StepIcon } from '@/components/common';
 import { StackedProblem, BorrowRow, Timeline, BorrowVisualization } from '@/components/math';
 import { generateBorrowProblem } from '@/lib/problemGenerators';
 import { calculateBorrowAdjustments, padNumber } from '@/lib/mathUtils';
+import { useAudio } from '@/hooks/useAudio';
 import type { Problem } from '@/types';
 
 type Mode = 'demo' | 'practice';
@@ -12,19 +13,21 @@ type Mode = 'demo' | 'practice';
 interface DemoStep {
   label: string;
   description: string;
+  narration: string;
 }
 
 const DEMO_STEPS: DemoStep[] = [
-  { label: 'Start', description: 'Look at the problem' },
-  { label: 'Check', description: 'Can we subtract the ones?' },
-  { label: 'Borrow', description: 'Borrow from the tens' },
-  { label: 'Ones', description: 'Subtract the ones' },
-  { label: 'Tens', description: 'Subtract the tens' },
-  { label: 'Hundreds', description: 'Subtract the hundreds' },
-  { label: 'Done', description: 'Final answer!' },
+  { label: 'Start', description: 'Look at the problem', narration: 'Look at the problem!' },
+  { label: 'Check', description: 'Can we subtract the ones?', narration: 'Can we subtract?' },
+  { label: 'Borrow', description: 'Borrow from the tens', narration: 'Borrow from next door!' },
+  { label: 'Ones', description: 'Subtract the ones', narration: 'Subtract the ones!' },
+  { label: 'Tens', description: 'Subtract the tens', narration: 'Subtract the tens!' },
+  { label: 'Hundreds', description: 'Subtract the hundreds', narration: 'Subtract the hundreds!' },
+  { label: 'Done', description: 'Final answer!', narration: 'Done! Great job!' },
 ];
 
 export function BorrowingSection() {
+  const { speak, playSound, clickSound } = useAudio();
   const [mode, setMode] = useState<Mode>('demo');
   const [problem, setProblem] = useState<Problem | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
@@ -88,7 +91,7 @@ export function BorrowingSection() {
   }, []);
 
   // Compute state for a given step
-  const computeStateForStep = useCallback((targetStep: number) => {
+  const computeStateForStep = useCallback((targetStep: number, shouldSpeak = true) => {
     if (!problem) return;
 
     const { borrows, adjusted } = calculateBorrowAdjustments(problem.num1, problem.num2, totalLen);
@@ -103,17 +106,7 @@ export function BorrowingSection() {
     const newAnswerDigits = Array(totalLen).fill('') as string[];
     let newBorrowVizData: typeof borrowVizData = null;
 
-    // Build up state based on target step
-    // Step 0: Start - show original problem
-    // Step 1: Check - show if ones needs borrow
-    // Step 2: Borrow - apply borrow if needed
-    // Step 3: Ones - show ones answer
-    // Step 4: Tens - show tens answer
-    // Step 5: Hundreds - show hundreds answer
-    // Step 6: Done
-
     if (targetStep >= 1) {
-      // Show check visualization for ones column
       const topDigit = originalDigits[totalLen - 1];
       const bottomDigit = bottomDigits[totalLen - 1];
       if (targetStep === 1) {
@@ -127,11 +120,10 @@ export function BorrowingSection() {
     }
 
     if (targetStep >= 2) {
-      // Apply borrow for ones column if needed
       if (borrows[totalLen - 1]) {
         newDisplayDigits = [...adjusted];
-        newBorrowed[totalLen - 2] = true; // tens gave
-        newReceived[totalLen - 1] = true; // ones received
+        newBorrowed[totalLen - 2] = true;
+        newReceived[totalLen - 1] = true;
         if (targetStep === 2) {
           newBorrowVizData = {
             topDigit: originalDigits[totalLen - 1],
@@ -148,11 +140,8 @@ export function BorrowingSection() {
     }
 
     if (targetStep >= 3) {
-      // Show ones answer
       newAnswerDigits[totalLen - 1] = answerStr[totalLen - 1];
-      // Apply all borrows for display
       newDisplayDigits = [...adjusted];
-      // Show any additional borrows
       if (borrows[totalLen - 2]) {
         newBorrowed[totalLen - 3] = true;
         newReceived[totalLen - 2] = true;
@@ -163,7 +152,6 @@ export function BorrowingSection() {
     }
 
     if (targetStep >= 4) {
-      // Show tens answer
       newAnswerDigits[totalLen - 2] = answerStr[totalLen - 2];
       if (targetStep === 4) {
         newBorrowVizData = null;
@@ -171,7 +159,6 @@ export function BorrowingSection() {
     }
 
     if (targetStep >= 5) {
-      // Show hundreds answer
       newAnswerDigits[totalLen - 3] = answerStr[totalLen - 3];
       if (targetStep === 5) {
         newBorrowVizData = null;
@@ -179,7 +166,6 @@ export function BorrowingSection() {
     }
 
     if (targetStep >= 6) {
-      // Done
       newBorrowVizData = null;
     }
 
@@ -189,11 +175,15 @@ export function BorrowingSection() {
     setVisibleAnswerDigits(newAnswerDigits);
     setBorrowVizData(newBorrowVizData);
     setCurrentStep(targetStep);
-  }, [problem]);
+
+    // Narrate the step
+    if (shouldSpeak && DEMO_STEPS[targetStep]) {
+      speak(DEMO_STEPS[targetStep].narration);
+    }
+  }, [problem, speak]);
 
   // Go to a specific step
   const goToStep = useCallback((targetStep: number) => {
-    // Stop any playing animation
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       setIsPlaying(false);
@@ -201,15 +191,22 @@ export function BorrowingSection() {
     computeStateForStep(targetStep);
   }, [computeStateForStep]);
 
+  const handleModeChange = (newMode: Mode) => {
+    clickSound();
+    setMode(newMode);
+    stopDemo();
+    generateNewProblem();
+    speak(newMode === 'demo' ? 'Demo mode! Watch and learn!' : 'Practice mode! Try it yourself!');
+  };
+
   const playDemo = () => {
     if (!problem) return;
+    clickSound();
 
-    // Stop any existing playback
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
-    // Start from step 0
     goToStep(0);
     setIsPlaying(true);
 
@@ -218,6 +215,7 @@ export function BorrowingSection() {
       step++;
       if (step >= DEMO_STEPS.length) {
         setIsPlaying(false);
+        playSound('celebrate');
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
         }
@@ -241,12 +239,13 @@ export function BorrowingSection() {
     if (practiceDisplayDigits[giverIndex] <= 0) return;
     if (practiceReceived[receiverIndex]) return;
 
-    // Get bottom digit for validation
     if (!problem) return;
     const bottomDigits = padNumber(problem.num2, totalLen).split('').map(Number);
 
-    // Check if this column actually needs borrowing
     if (practiceDisplayDigits[receiverIndex] >= bottomDigits[receiverIndex]) return;
+
+    playSound('whoosh');
+    speak('Borrow!');
 
     const newDisplayDigits = [...practiceDisplayDigits];
     const newBorrowed = [...practiceBorrowed];
@@ -264,6 +263,7 @@ export function BorrowingSection() {
 
   const checkPracticeAnswer = () => {
     if (!problem) return;
+    playSound('click');
 
     const expectedAnswer = padNumber(problem.answer, totalLen);
     const correct = answerInputs.join('') === expectedAnswer;
@@ -279,34 +279,27 @@ export function BorrowingSection() {
     <div className="space-y-6">
       {/* Header */}
       <Card variant="elevated">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle>Borrowing</CardTitle>
-            <p className="mt-1 font-body text-chocolate/70">
-              Learn to borrow numbers when subtracting!
-            </p>
-          </div>
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+          <CardTitle>Borrowing</CardTitle>
           <div className="flex gap-2">
-            <Button
-              variant={mode === 'demo' ? 'primary' : 'ghost'}
-              onClick={() => {
-                setMode('demo');
-                stopDemo();
-                generateNewProblem();
-              }}
+            <button
+              onClick={() => handleModeChange('demo')}
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 ${
+                mode === 'demo' ? 'bg-coral text-cream scale-110' : 'bg-chocolate/10 text-chocolate/60 hover:bg-chocolate/20'
+              }`}
+              aria-label="Demo mode"
             >
-              Demo
-            </Button>
-            <Button
-              variant={mode === 'practice' ? 'primary' : 'ghost'}
-              onClick={() => {
-                setMode('practice');
-                stopDemo();
-                generateNewProblem();
-              }}
+              <StepIcon type="start" size="lg" />
+            </button>
+            <button
+              onClick={() => handleModeChange('practice')}
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 ${
+                mode === 'practice' ? 'bg-sage text-cream scale-110' : 'bg-chocolate/10 text-chocolate/60 hover:bg-chocolate/20'
+              }`}
+              aria-label="Practice mode"
             >
-              Practice
-            </Button>
+              <StepIcon type="check" size="lg" />
+            </button>
           </div>
         </div>
       </Card>
@@ -357,23 +350,26 @@ export function BorrowingSection() {
 
                 <div className="flex gap-3">
                   {isPlaying ? (
-                    <Button variant="secondary" onClick={stopDemo}>
-                      Stop
+                    <Button variant="secondary" onClick={() => { clickSound(); stopDemo(); }} aria-label="Stop">
+                      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="6" y="6" width="12" height="12" rx="1" />
+                      </svg>
                     </Button>
                   ) : (
                     <>
-                      <Button onClick={playDemo}>Play Demo</Button>
-                      <Button variant="ghost" onClick={generateNewProblem}>
-                        New Problem
+                      <Button onClick={playDemo} aria-label="Play demo">
+                        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </Button>
+                      <Button variant="ghost" onClick={() => { clickSound(); generateNewProblem(); }} aria-label="New problem">
+                        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                        </svg>
                       </Button>
                     </>
                   )}
                 </div>
-
-                {/* Step navigation hint */}
-                <p className="text-center font-body text-xs text-chocolate/50">
-                  Click any step above to jump to it
-                </p>
               </div>
             </CardContent>
           </Card>
@@ -382,15 +378,26 @@ export function BorrowingSection() {
         <Card>
           <CardContent>
             <div className="flex flex-col items-center gap-6">
-              <div className="flex items-center gap-4">
-                <span className="font-display text-lg text-chocolate">
-                  Score: {score.correct}/{score.total}
-                </span>
+              {/* Score as dots */}
+              <div className="flex items-center gap-2">
+                {Array.from({ length: score.total }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-3 w-3 rounded-full ${
+                      i < score.correct ? 'bg-sage' : 'bg-coral/50'
+                    }`}
+                  />
+                ))}
+                {score.total === 0 && (
+                  <div className="h-3 w-12 rounded-full bg-chocolate/10" />
+                )}
               </div>
 
-              <p className="text-center font-body text-sm text-chocolate/60">
-                Click on a digit that needs to borrow (when top &lt; bottom)
-              </p>
+              {/* Visual hint: borrow icon */}
+              <div className="flex items-center gap-2 text-chocolate/40">
+                <StepIcon type="borrow" size="lg" />
+                <span className="font-display text-sm">?</span>
+              </div>
 
               {problem && (
                 <StackedProblem
@@ -410,6 +417,7 @@ export function BorrowingSection() {
                   }
                   answer={answerInputs}
                   onDigitChange={(i, v) => {
+                    playSound('pop');
                     const newInputs = [...answerInputs];
                     newInputs[i] = v.replace(/[^0-9]/g, '').slice(-1);
                     setAnswerInputs(newInputs);
@@ -418,18 +426,24 @@ export function BorrowingSection() {
                 />
               )}
 
-              <AnswerFeedback isCorrect={isCorrect} correctAnswer={problem?.answer} />
+              <AnswerFeedback isCorrect={isCorrect} showText={false} />
 
               <div className="flex gap-3">
                 {isCorrect === null ? (
                   <Button
                     onClick={checkPracticeAnswer}
                     disabled={answerInputs.some((d) => d === '')}
+                    size="lg"
+                    aria-label="Check answer"
                   >
-                    Check Answer
+                    <StepIcon type="check" size="lg" />
                   </Button>
                 ) : (
-                  <Button onClick={generateNewProblem}>Next Problem</Button>
+                  <Button onClick={() => { clickSound(); generateNewProblem(); }} size="lg" aria-label="Next problem">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </Button>
                 )}
               </div>
             </div>

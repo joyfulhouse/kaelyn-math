@@ -1,6 +1,7 @@
 'use client';
 
-import { type HTMLAttributes } from 'react';
+import { type HTMLAttributes, useEffect, useRef } from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 type FeedbackType = 'success' | 'error' | 'info' | 'warning';
 
@@ -8,6 +9,7 @@ interface FeedbackProps extends HTMLAttributes<HTMLDivElement> {
   type: FeedbackType;
   message: string;
   show?: boolean;
+  speakMessage?: boolean;
 }
 
 const typeStyles: Record<FeedbackType, { bg: string; text: string; icon: string }> = {
@@ -37,9 +39,30 @@ export function Feedback({
   type,
   message,
   show = true,
+  speakMessage = false,
   className = '',
   ...props
 }: FeedbackProps) {
+  const { speak, playSound } = useAudio();
+  const hasPlayedRef = useRef(false);
+
+  useEffect(() => {
+    if (show && !hasPlayedRef.current) {
+      hasPlayedRef.current = true;
+      if (type === 'success') {
+        playSound('correct');
+      } else if (type === 'error') {
+        playSound('incorrect');
+      }
+      if (speakMessage) {
+        speak(message);
+      }
+    }
+    if (!show) {
+      hasPlayedRef.current = false;
+    }
+  }, [show, type, message, speakMessage, speak, playSound]);
+
   if (!show) return null;
 
   const styles = typeStyles[type];
@@ -73,18 +96,36 @@ export function Feedback({
 interface AnswerFeedbackProps {
   isCorrect: boolean | null;
   correctAnswer?: number | string;
+  showText?: boolean;
 }
 
-export function AnswerFeedback({ isCorrect, correctAnswer }: AnswerFeedbackProps) {
+export function AnswerFeedback({ isCorrect, correctAnswer, showText = true }: AnswerFeedbackProps) {
+  const { celebrateCorrect, encourageRetry } = useAudio();
+  const hasPlayedRef = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (isCorrect !== null && hasPlayedRef.current !== isCorrect) {
+      hasPlayedRef.current = isCorrect;
+      if (isCorrect) {
+        celebrateCorrect();
+      } else {
+        encourageRetry();
+      }
+    }
+    if (isCorrect === null) {
+      hasPlayedRef.current = null;
+    }
+  }, [isCorrect, celebrateCorrect, encourageRetry]);
+
   if (isCorrect === null) return null;
 
   if (isCorrect) {
     return (
       <div className="flex items-center gap-2 text-sage animate-celebrate">
-        <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+        <svg className="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span className="font-display font-bold">Correct!</span>
+        {showText && <span className="font-display font-bold">Correct!</span>}
       </div>
     );
   }
@@ -92,12 +133,12 @@ export function AnswerFeedback({ isCorrect, correctAnswer }: AnswerFeedbackProps
   return (
     <div className="flex flex-col items-center gap-1 text-coral animate-shake">
       <div className="flex items-center gap-2">
-        <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+        <svg className="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
           <path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span className="font-display font-bold">Try again!</span>
+        {showText && <span className="font-display font-bold">Try again!</span>}
       </div>
-      {correctAnswer !== undefined && (
+      {showText && correctAnswer !== undefined && (
         <span className="text-sm text-chocolate/60">
           The answer was {correctAnswer}
         </span>

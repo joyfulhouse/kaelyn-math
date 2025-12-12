@@ -1,188 +1,256 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { setActiveSection } from '@/store/navigationSlice';
-import { Card } from '@/components/common';
+import { Card, StepIcon } from '@/components/common';
+import { useAudio } from '@/hooks/useAudio';
 import type { SectionId } from '@/types';
 
 interface ModuleCard {
   id: SectionId;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
+  iconType: 'ones' | 'tens' | 'hundreds' | 'thousands' | 'add' | 'subtract' | 'multiply' | 'divide' | 'carry' | 'borrow' | 'check' | 'start';
+  narration: string;
   color: string;
+  bgColor: string;
 }
 
 const modules: ModuleCard[] = [
   {
     id: 'number-places',
-    title: 'Number Places',
-    description: 'Learn ones, tens, hundreds!',
-    color: 'bg-coral hover:bg-coral/90',
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" className="h-12 w-12">
-        <rect x="4" y="4" width="16" height="16" rx="4" fill="#FF7F6B" />
-        <rect x="28" y="4" width="16" height="16" rx="4" fill="#8FBC8F" />
-        <rect x="4" y="28" width="16" height="16" rx="4" fill="#FFD93D" />
-        <rect x="28" y="28" width="16" height="16" rx="4" fill="#7EB5D6" />
-        <text x="12" y="17" textAnchor="middle" className="fill-white font-display text-xs">1</text>
-        <text x="36" y="17" textAnchor="middle" className="fill-white font-display text-xs">0</text>
-        <text x="12" y="41" textAnchor="middle" className="fill-white font-display text-xs">0</text>
-        <text x="36" y="41" textAnchor="middle" className="fill-white font-display text-xs">0</text>
-      </svg>
-    ),
+    iconType: 'hundreds',
+    narration: 'Number Places! Learn ones, tens, and hundreds!',
+    color: 'text-coral',
+    bgColor: 'bg-coral',
   },
   {
     id: 'stacked-math',
-    title: 'Stacked Math',
-    description: 'Add & subtract vertically!',
-    color: 'bg-sage hover:bg-sage/90',
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" className="h-12 w-12">
-        <rect x="8" y="8" width="32" height="8" rx="2" fill="#8FBC8F" />
-        <rect x="8" y="20" width="32" height="8" rx="2" fill="#8FBC8F" />
-        <rect x="8" y="32" width="32" height="8" rx="2" fill="#FFD93D" />
-      </svg>
-    ),
+    iconType: 'add',
+    narration: 'Stacked Math! Add and subtract!',
+    color: 'text-sage',
+    bgColor: 'bg-sage',
   },
   {
     id: 'carry-over',
-    title: 'Carry Over',
-    description: 'Master carrying numbers!',
-    color: 'bg-yellow hover:bg-yellow/90',
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" className="h-12 w-12">
-        <path d="M24 38V10M24 10L14 20M24 10L34 20" stroke="#FFD93D" strokeWidth="4" strokeLinecap="round" />
-      </svg>
-    ),
+    iconType: 'carry',
+    narration: 'Carry Over! Learn to carry numbers up!',
+    color: 'text-yellow',
+    bgColor: 'bg-yellow',
   },
   {
     id: 'borrowing',
-    title: 'Borrowing',
-    description: 'Learn to borrow numbers!',
-    color: 'bg-sky hover:bg-sky/90',
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" className="h-12 w-12">
-        <path d="M24 10V38M24 38L14 28M24 38L34 28" stroke="#7EB5D6" strokeWidth="4" strokeLinecap="round" />
-      </svg>
-    ),
+    iconType: 'borrow',
+    narration: 'Borrowing! Learn to borrow from next door!',
+    color: 'text-sky',
+    bgColor: 'bg-sky',
   },
   {
     id: 'multiplication',
-    title: 'Multiplication',
-    description: 'Times tables are fun!',
-    color: 'bg-coral hover:bg-coral/90',
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" className="h-12 w-12">
-        <path d="M14 14L34 34M34 14L14 34" stroke="#FF7F6B" strokeWidth="4" strokeLinecap="round" />
-      </svg>
-    ),
+    iconType: 'multiply',
+    narration: 'Multiplication! Times tables are fun!',
+    color: 'text-coral',
+    bgColor: 'bg-coral',
   },
   {
     id: 'division',
-    title: 'Division',
-    description: 'Share and divide equally!',
-    color: 'bg-sage hover:bg-sage/90',
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" className="h-12 w-12">
-        <circle cx="24" cy="12" r="4" fill="#8FBC8F" />
-        <line x1="10" y1="24" x2="38" y2="24" stroke="#8FBC8F" strokeWidth="4" />
-        <circle cx="24" cy="36" r="4" fill="#8FBC8F" />
-      </svg>
-    ),
+    iconType: 'divide',
+    narration: 'Division! Share and divide equally!',
+    color: 'text-sage',
+    bgColor: 'bg-sage',
   },
   {
     id: 'practice',
-    title: 'Practice',
-    description: 'Test your skills!',
-    color: 'bg-yellow hover:bg-yellow/90',
-    icon: (
-      <svg viewBox="0 0 48 48" fill="none" className="h-12 w-12">
-        <circle cx="24" cy="24" r="18" stroke="#FFD93D" strokeWidth="4" />
-        <circle cx="24" cy="24" r="10" stroke="#FFD93D" strokeWidth="4" />
-        <circle cx="24" cy="24" r="3" fill="#FFD93D" />
-      </svg>
-    ),
+    iconType: 'check',
+    narration: 'Practice! Test your skills!',
+    color: 'text-yellow',
+    bgColor: 'bg-yellow',
   },
 ];
 
 export function HomeSection() {
   const dispatch = useAppDispatch();
+  const { speak, clickSound } = useAudio();
   const userName = useAppSelector((state) => state.session.userName);
   const totalStars = useAppSelector((state) => state.session.totalStars);
   const lessonsCompleted = useAppSelector((state) => state.session.lessonsCompleted);
 
-  const handleModuleClick = (sectionId: SectionId) => {
-    dispatch(setActiveSection(sectionId));
+  // Greet on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      speak(`Hi ${userName}! Let's learn math!`);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [userName, speak]);
+
+  const handleModuleClick = (module: ModuleCard) => {
+    clickSound();
+    speak(module.narration);
+    // Short delay to let narration start before navigation
+    setTimeout(() => {
+      dispatch(setActiveSection(module.id));
+    }, 300);
   };
 
   return (
     <div className="space-y-8">
-      {/* Hero Card */}
+      {/* Hero Card - Visual with minimal text */}
       <Card variant="elevated" className="bg-gradient-to-br from-paper to-cream">
-        <div className="flex flex-col items-center gap-6 md:flex-row">
-          <div className="flex-shrink-0">
+        <div className="flex flex-col items-center gap-6">
+          {/* Animated mascot illustration */}
+          <div className="relative">
             <svg viewBox="0 0 200 160" fill="none" className="h-40 w-52">
+              {/* Shadow */}
               <ellipse cx="100" cy="145" rx="80" ry="10" fill="#E8DDD4" />
+              {/* Board */}
               <rect x="60" y="80" width="80" height="60" rx="8" fill="#8FBC8F" />
               <rect x="65" y="85" width="70" height="45" rx="4" fill="#F5F5F5" />
-              <text x="100" y="115" textAnchor="middle" className="fill-chocolate font-display text-2xl">
-                2+2=4
-              </text>
-              <circle cx="50" cy="60" r="25" fill="#FF7F6B" />
+              {/* Math on board - just visual symbols */}
+              <circle cx="82" cy="107" r="6" fill="#FF7F6B" />
+              <text x="96" y="112" className="fill-chocolate font-display text-lg">+</text>
+              <circle cx="110" cy="107" r="6" fill="#7EB5D6" />
+              <text x="124" y="112" className="fill-chocolate font-display text-lg">=</text>
+              <circle cx="78" cy="118" r="3" fill="#FFD93D" />
+              <circle cx="86" cy="118" r="3" fill="#FFD93D" />
+              <circle cx="94" cy="118" r="3" fill="#FFD93D" />
+              {/* Character */}
+              <circle cx="50" cy="60" r="25" fill="#FF7F6B" className="animate-pulse" />
               <circle cx="50" cy="58" r="16" fill="#FFF8F0" />
               <circle cx="44" cy="54" r="3" fill="#4A3728" />
               <circle cx="56" cy="54" r="3" fill="#4A3728" />
               <path d="M42 64Q50 72 58 64" stroke="#4A3728" strokeWidth="2" fill="none" />
+              {/* Star */}
               <circle cx="150" cy="50" r="20" fill="#FFD93D" />
               <path d="M150 35L152 42L160 42L154 47L156 54L150 49L144 54L146 47L140 42L148 42Z" fill="#FFF8F0" />
             </svg>
           </div>
-          <div className="text-center md:text-left">
-            <h2 className="font-display text-3xl font-bold text-chocolate">
-              Welcome, <span className="text-coral">{userName}</span>!
-            </h2>
-            <p className="mt-2 font-body text-lg text-chocolate/70">
-              Ready for a math adventure? Pick a topic below and let&apos;s learn together!
-            </p>
-            <div className="mt-4 flex flex-wrap justify-center gap-4 md:justify-start">
-              <div className="flex items-center gap-2 rounded-full bg-yellow/20 px-4 py-2">
-                <svg className="h-5 w-5 text-yellow" fill="currentColor" viewBox="0 0 24 24">
+
+          {/* Stats - Visual only with icons */}
+          <div className="flex flex-wrap justify-center gap-6">
+            {/* Stars earned */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-yellow/20">
+                <svg className="h-8 w-8 text-yellow" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                 </svg>
-                <span className="font-display font-bold text-chocolate">{totalStars} Stars</span>
               </div>
-              <div className="flex items-center gap-2 rounded-full bg-sage/20 px-4 py-2">
-                <svg className="h-5 w-5 text-sage" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <span className="font-display text-2xl font-bold text-chocolate">{totalStars}</span>
+            </div>
+
+            {/* Lessons completed */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sage/20">
+                <svg className="h-8 w-8 text-sage" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="font-display font-bold text-chocolate">
-                  {lessonsCompleted.length} Completed
-                </span>
               </div>
+              <span className="font-display text-2xl font-bold text-chocolate">{lessonsCompleted.length}</span>
+            </div>
+
+            {/* Module count - visual indicator */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky/20">
+                <div className="grid grid-cols-2 gap-1">
+                  <div className="h-3 w-3 rounded bg-sky" />
+                  <div className="h-3 w-3 rounded bg-sky" />
+                  <div className="h-3 w-3 rounded bg-sky" />
+                  <div className="h-3 w-3 rounded bg-sky" />
+                </div>
+              </div>
+              <span className="font-display text-2xl font-bold text-chocolate">{modules.length}</span>
             </div>
           </div>
         </div>
       </Card>
 
-      {/* Module Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {modules.map((module) => (
-          <button
-            key={module.id}
-            onClick={() => handleModuleClick(module.id)}
-            className={`
-              group flex flex-col items-center gap-3 rounded-2xl p-6 text-cream
-              shadow-soft transition-all duration-200
-              hover:-translate-y-1 hover:shadow-lifted
-              ${module.color}
-            `}
-          >
-            <div className="rounded-xl bg-white/20 p-3">{module.icon}</div>
-            <h3 className="font-display text-xl font-bold">{module.title}</h3>
-            <p className="font-body text-sm text-cream/80">{module.description}</p>
-          </button>
-        ))}
+      {/* Module Grid - Large touch targets, icon-focused */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {modules.map((module) => {
+          const isCompleted = lessonsCompleted.includes(module.id);
+          return (
+            <button
+              key={module.id}
+              onClick={() => handleModuleClick(module)}
+              className={`
+                group relative flex flex-col items-center justify-center gap-3 rounded-2xl p-6
+                shadow-soft transition-all duration-200
+                hover:-translate-y-1 hover:scale-105 hover:shadow-lifted
+                active:scale-95
+                ${module.bgColor} text-cream
+              `}
+              aria-label={module.narration}
+            >
+              {/* Completion indicator */}
+              {isCompleted && (
+                <div className="absolute right-2 top-2">
+                  <svg className="h-6 w-6 text-cream/80" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                  </svg>
+                </div>
+              )}
+
+              {/* Large icon */}
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/20 transition-transform group-hover:scale-110">
+                <StepIcon type={module.iconType} size="lg" className="h-12 w-12" />
+              </div>
+
+              {/* Visual indicator dots based on module type */}
+              <div className="flex gap-1">
+                {module.id === 'number-places' && (
+                  <>
+                    <div className="h-3 w-3 rounded-full bg-cream/60" />
+                    <div className="h-3 w-3 rounded-full bg-cream/60" />
+                    <div className="h-3 w-3 rounded-full bg-cream/60" />
+                  </>
+                )}
+                {module.id === 'stacked-math' && (
+                  <>
+                    <div className="h-2 w-6 rounded bg-cream/60" />
+                    <div className="mx-1 h-2 w-2 rounded-full bg-cream/60" />
+                    <div className="h-2 w-6 rounded bg-cream/60" />
+                  </>
+                )}
+                {module.id === 'carry-over' && (
+                  <svg className="h-4 w-8 text-cream/60" viewBox="0 0 32 16" fill="currentColor">
+                    <path d="M16 0l6 8h-4v8h-4v-8h-4l6-8z" />
+                  </svg>
+                )}
+                {module.id === 'borrowing' && (
+                  <svg className="h-4 w-8 text-cream/60" viewBox="0 0 32 16" fill="currentColor">
+                    <path d="M16 16l-6-8h4V0h4v8h4l-6 8z" />
+                  </svg>
+                )}
+                {module.id === 'multiplication' && (
+                  <svg className="h-4 w-4 text-cream/60" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="2" fill="none" />
+                  </svg>
+                )}
+                {module.id === 'division' && (
+                  <svg className="h-4 w-6 text-cream/60" viewBox="0 0 24 16" fill="currentColor">
+                    <circle cx="12" cy="3" r="2" />
+                    <rect x="4" y="7" width="16" height="2" rx="1" />
+                    <circle cx="12" cy="13" r="2" />
+                  </svg>
+                )}
+                {module.id === 'practice' && (
+                  <>
+                    <div className="h-2 w-2 rounded-full bg-cream/60" />
+                    <div className="h-2 w-2 rounded-full bg-cream/60" />
+                    <div className="h-2 w-2 rounded-full bg-cream/60" />
+                    <div className="h-2 w-2 rounded-full bg-cream/60" />
+                    <div className="h-2 w-2 rounded-full bg-cream/60" />
+                  </>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Quick start hint - animated arrow pointing to modules */}
+      <div className="flex items-center justify-center gap-2 text-chocolate/40">
+        <svg className="h-6 w-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
       </div>
     </div>
   );

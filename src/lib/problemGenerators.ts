@@ -186,8 +186,16 @@ export function generateProblems(
  */
 export function generatePlaceValueQuiz(maxNumber: number = 9999): PlaceValueQuiz {
   const number = randomInRange(1, maxNumber);
-  const places: ('thousands' | 'hundreds' | 'tens' | 'ones')[] = ['thousands', 'hundreds', 'tens', 'ones'];
-  const place = places[Math.floor(Math.random() * places.length)];
+
+  // Only ask about places that exist in the number
+  const numDigits = number.toString().length;
+  const availablePlaces: ('thousands' | 'hundreds' | 'tens' | 'ones')[] = [];
+  if (numDigits >= 4) availablePlaces.push('thousands');
+  if (numDigits >= 3) availablePlaces.push('hundreds');
+  if (numDigits >= 2) availablePlaces.push('tens');
+  availablePlaces.push('ones'); // ones always exists
+
+  const place = availablePlaces[Math.floor(Math.random() * availablePlaces.length)];
 
   const placeValues = {
     thousands: Math.floor(number / 1000) % 10,
@@ -198,23 +206,32 @@ export function generatePlaceValueQuiz(maxNumber: number = 9999): PlaceValueQuiz
 
   const answer = placeValues[place];
 
-  // Generate options from the digits in the number (in order)
+  // Generate options - ALWAYS include the correct answer first
   const digits = number.toString().split('').map(Number);
   const uniqueDigits = [...new Set(digits)];
 
-  // If we have fewer than 4 unique digits, add some random ones
-  while (uniqueDigits.length < 4) {
-    const randomDigit = randomInRange(0, 9);
-    if (!uniqueDigits.includes(randomDigit)) {
-      uniqueDigits.push(randomDigit);
+  // Start with the answer
+  const options: number[] = [answer];
+
+  // Add other digits from the number
+  for (const d of digits) {
+    if (!options.includes(d) && options.length < 4) {
+      options.push(d);
     }
   }
 
-  // Keep digits in the order they appear in the number, then add extras
-  const options = digits.slice(0, 4);
-  if (options.length < 4) {
-    const extras = uniqueDigits.filter(d => !options.includes(d));
-    options.push(...extras.slice(0, 4 - options.length));
+  // If we still need more options, add random digits
+  while (options.length < 4) {
+    const randomDigit = randomInRange(0, 9);
+    if (!options.includes(randomDigit)) {
+      options.push(randomDigit);
+    }
+  }
+
+  // Shuffle the options so the answer isn't always first
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
   }
 
   return {

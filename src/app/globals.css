@@ -336,6 +336,16 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Horizontal bounce animation */
+@keyframes bounceX {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-4px);
+  }
+}
+
 /* Block appear animation */
 @keyframes blockAppear {
   0% {
@@ -417,6 +427,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-bounceIn {
   animation: bounceIn 0.4s ease-out forwards;
+}
+
+.animate-bounce-x {
+  animation: bounceX 1s ease-in-out infinite;
 }
 
 .animate-blockAppear {

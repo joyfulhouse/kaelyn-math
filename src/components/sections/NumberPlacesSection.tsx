@@ -1,36 +1,55 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Card, CardTitle, CardContent, Button, AnswerFeedback } from '@/components/common';
+import { useState, useCallback, useEffect } from 'react';
+import { Card, CardTitle, CardContent, Button, AnswerFeedback, StepIcon } from '@/components/common';
 import { PlaceValueDisplay, PlaceValueBlocks } from '@/components/math';
 import { generatePlaceValueQuiz } from '@/lib/problemGenerators';
 import { parseIntoPlaceValues } from '@/lib/mathUtils';
+import { useAudio } from '@/hooks/useAudio';
 import type { PlaceValueQuiz, PlaceValue } from '@/types';
 
 type Mode = 'explore' | 'quiz';
 
+// Audio narrations for place values
+const PLACE_NARRATIONS: Record<PlaceValue, string> = {
+  thousands: 'Thousands! The biggest place!',
+  hundreds: 'Hundreds!',
+  tens: 'Tens!',
+  ones: 'Ones! The smallest place!',
+};
+
 export function NumberPlacesSection() {
+  const { speak, playSound, clickSound } = useAudio();
   const [mode, setMode] = useState<Mode>('explore');
   const [exploreNumber, setExploreNumber] = useState(1234);
   const [highlightPlace, setHighlightPlace] = useState<PlaceValue | undefined>();
 
   // Quiz state
   const [quiz, setQuiz] = useState<PlaceValueQuiz | null>(null);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState({ correct: 0, total: 0 });
 
+  // Narrate quiz question when it changes
+  useEffect(() => {
+    if (quiz && mode === 'quiz' && isCorrect === null) {
+      speak(`Which number is in the ${quiz.place} place?`);
+    }
+  }, [quiz, mode, isCorrect, speak]);
+
   const startQuiz = useCallback(() => {
+    clickSound();
     setQuiz(generatePlaceValueQuiz(9999));
-    setSelectedAnswer(null);
+    setSelectedIndex(null);
     setIsCorrect(null);
     setMode('quiz');
-  }, []);
+  }, [clickSound]);
 
-  const handleAnswerSelect = (answer: number) => {
-    if (isCorrect !== null) return; // Already answered
+  const handleAnswerSelect = (index: number, answer: number) => {
+    if (isCorrect !== null) return;
+    playSound('click');
 
-    setSelectedAnswer(answer);
+    setSelectedIndex(index);
     const correct = answer === quiz?.answer;
     setIsCorrect(correct);
     setScore((prev) => ({
@@ -40,34 +59,35 @@ export function NumberPlacesSection() {
   };
 
   const nextQuestion = () => {
+    clickSound();
     setQuiz(generatePlaceValueQuiz(9999));
-    setSelectedAnswer(null);
+    setSelectedIndex(null);
     setIsCorrect(null);
   };
 
   const randomNumber = () => {
-    setExploreNumber(Math.floor(Math.random() * 9999) + 1);
+    clickSound();
+    const newNum = Math.floor(Math.random() * 9999) + 1;
+    setExploreNumber(newNum);
+    speak(`${newNum}`);
   };
 
-  const placeLabels: Record<PlaceValue, string> = {
-    thousands: 'thousands',
-    hundreds: 'hundreds',
-    tens: 'tens',
-    ones: 'ones',
+  const handlePlaceClick = (place: PlaceValue) => {
+    clickSound();
+    if (highlightPlace === place) {
+      setHighlightPlace(undefined);
+    } else {
+      setHighlightPlace(place);
+      speak(PLACE_NARRATIONS[place]);
+    }
   };
 
   const placeValues = parseIntoPlaceValues(exploreNumber);
-  const placeMultipliers: Record<PlaceValue, number> = {
-    thousands: 1000,
-    hundreds: 100,
-    tens: 10,
-    ones: 1,
-  };
-  const placeColors: Record<PlaceValue, string> = {
-    thousands: 'text-coral',
-    hundreds: 'text-yellow',
-    tens: 'text-sage',
-    ones: 'text-sky',
+  const placeBgColors: Record<PlaceValue, string> = {
+    thousands: 'bg-coral',
+    hundreds: 'bg-yellow',
+    tens: 'bg-sage',
+    ones: 'bg-sky',
   };
 
   return (
@@ -75,24 +95,21 @@ export function NumberPlacesSection() {
       {/* Header */}
       <Card variant="elevated">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-          <div>
-            <CardTitle>Number Places</CardTitle>
-            <p className="mt-1 font-body text-chocolate/70">
-              Learn about ones, tens, hundreds, and thousands!
-            </p>
-          </div>
+          <CardTitle>Number Places</CardTitle>
           <div className="flex gap-2">
             <Button
               variant={mode === 'explore' ? 'primary' : 'ghost'}
-              onClick={() => setMode('explore')}
+              onClick={() => { clickSound(); setMode('explore'); }}
+              aria-label="Explore mode"
             >
-              Explore
+              <StepIcon type="start" size="md" />
             </Button>
             <Button
               variant={mode === 'quiz' ? 'primary' : 'ghost'}
               onClick={startQuiz}
+              aria-label="Quiz mode"
             >
-              Quiz
+              <StepIcon type="check" size="md" />
             </Button>
           </div>
         </div>
@@ -105,20 +122,20 @@ export function NumberPlacesSection() {
           <Card>
             <CardContent>
               <div className="flex flex-col items-center gap-4">
-                <label className="font-body text-chocolate/70">
-                  Enter a number to explore (1-9999):
-                </label>
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
                     min="1"
                     max="9999"
                     value={exploreNumber}
-                    onChange={(e) => setExploreNumber(Math.min(9999, Math.max(1, parseInt(e.target.value) || 1)))}
-                    className="w-32 rounded-xl border-2 border-chocolate/20 bg-cream px-4 py-2 text-center font-display text-2xl font-bold text-chocolate outline-none focus:border-coral"
+                    onChange={(e) => {
+                      const val = Math.min(9999, Math.max(1, parseInt(e.target.value) || 1));
+                      setExploreNumber(val);
+                    }}
+                    className="w-36 rounded-xl border-2 border-chocolate/20 bg-cream px-4 py-3 text-center font-display text-3xl font-bold text-chocolate outline-none focus:border-coral"
                   />
-                  <Button variant="secondary" size="sm" onClick={randomNumber}>
-                    Random
+                  <Button variant="secondary" size="lg" onClick={randomNumber} aria-label="Random number">
+                    🎲
                   </Button>
                 </div>
               </div>
@@ -127,65 +144,80 @@ export function NumberPlacesSection() {
 
           {/* Place Value Display */}
           <Card>
-            <CardTitle className="text-center">Place Values</CardTitle>
-            <CardContent className="mt-6">
+            <CardContent>
               <div className="flex justify-center">
                 <PlaceValueDisplay
                   number={exploreNumber}
                   highlightPlace={highlightPlace}
-                  showLabels
+                  showLabels={false}
                   size="lg"
                 />
               </div>
 
-              {/* Place selector buttons */}
-              <div className="mt-6 flex flex-wrap justify-center gap-2">
+              {/* Place selector buttons - visual icons */}
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
                 {(['thousands', 'hundreds', 'tens', 'ones'] as PlaceValue[]).map((place) => (
-                  <Button
+                  <button
                     key={place}
-                    variant={highlightPlace === place ? 'primary' : 'ghost'}
-                    size="sm"
-                    onClick={() => setHighlightPlace(highlightPlace === place ? undefined : place)}
+                    onClick={() => handlePlaceClick(place)}
+                    className={`
+                      flex h-14 w-14 items-center justify-center rounded-full
+                      transition-all duration-200 hover:scale-110
+                      ${highlightPlace === place
+                        ? `${placeBgColors[place]} text-cream scale-110`
+                        : 'bg-chocolate/10 text-chocolate/60 hover:bg-chocolate/20'}
+                    `}
+                    aria-label={place}
                   >
-                    {placeLabels[place]}
-                  </Button>
+                    <StepIcon type={place === 'thousands' ? 'thousands' : place === 'hundreds' ? 'hundreds' : place === 'tens' ? 'tens' : 'ones'} size="lg" />
+                  </button>
                 ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* Place Value Breakdown */}
+          {/* Visual Place Value Breakdown - dots instead of text */}
           <Card>
-            <CardTitle className="text-center">Place Value Breakdown</CardTitle>
-            <CardContent className="mt-6">
-              <div className="space-y-4">
-                <p className="text-center font-body text-lg text-chocolate">
-                  The number <strong className="text-2xl">{exploreNumber}</strong> has:
-                </p>
-                <ul className="space-y-2">
-                  {(['thousands', 'hundreds', 'tens', 'ones'] as PlaceValue[]).map((place) => (
-                    <li key={place} className="flex items-center justify-center gap-2 font-body text-chocolate">
-                      <span className={`font-bold ${placeColors[place]}`}>
-                        {placeValues[place]}
-                      </span>
-                      <span>{placeLabels[place]}</span>
-                      <span className="text-chocolate/60">
-                        ({placeValues[place]} × {placeMultipliers[place].toLocaleString()} = {(placeValues[place] * placeMultipliers[place]).toLocaleString()})
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-4 text-center font-display text-xl font-bold text-chocolate">
-                  {(placeValues.thousands * 1000).toLocaleString()} + {(placeValues.hundreds * 100).toLocaleString()} + {placeValues.tens * 10} + {placeValues.ones} = <span className="text-coral">{exploreNumber.toLocaleString()}</span>
-                </p>
+            <CardContent>
+              <div className="flex flex-wrap justify-center gap-4">
+                {(['thousands', 'hundreds', 'tens', 'ones'] as PlaceValue[]).map((place) => (
+                  <div
+                    key={place}
+                    className={`flex flex-col items-center gap-2 rounded-xl p-4 ${
+                      highlightPlace === place ? 'bg-chocolate/10' : ''
+                    }`}
+                  >
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-full ${placeBgColors[place]} text-cream`}>
+                      <span className="font-display text-xl font-bold">{placeValues[place]}</span>
+                    </div>
+                    <StepIcon type={place === 'thousands' ? 'thousands' : place === 'hundreds' ? 'hundreds' : place === 'tens' ? 'tens' : 'ones'} size="sm" className="text-chocolate/40" />
+                  </div>
+                ))}
+              </div>
+              {/* Visual equation with large numbers */}
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2 font-display text-2xl font-bold">
+                <span className="text-coral">{placeValues.thousands}</span>
+                <span className="text-chocolate/40">×</span>
+                <span className="text-chocolate/60">1000</span>
+                <span className="text-chocolate/40">+</span>
+                <span className="text-yellow">{placeValues.hundreds}</span>
+                <span className="text-chocolate/40">×</span>
+                <span className="text-chocolate/60">100</span>
+                <span className="text-chocolate/40">+</span>
+                <span className="text-sage">{placeValues.tens}</span>
+                <span className="text-chocolate/40">×</span>
+                <span className="text-chocolate/60">10</span>
+                <span className="text-chocolate/40">+</span>
+                <span className="text-sky">{placeValues.ones}</span>
+                <span className="text-chocolate/40">=</span>
+                <span className="text-coral text-3xl">{exploreNumber.toLocaleString()}</span>
               </div>
             </CardContent>
           </Card>
 
           {/* Visual Blocks */}
           <Card>
-            <CardTitle className="text-center">Visual Blocks</CardTitle>
-            <CardContent className="mt-6">
+            <CardContent>
               <PlaceValueBlocks number={exploreNumber} animated />
             </CardContent>
           </Card>
@@ -196,56 +228,80 @@ export function NumberPlacesSection() {
           <CardContent>
             {quiz && (
               <div className="flex flex-col items-center gap-6">
-                {/* Score */}
-                <div className="flex items-center gap-4">
-                  <span className="font-display text-lg text-chocolate">
-                    Score: {score.correct}/{score.total}
-                  </span>
-                </div>
-
-                {/* Question */}
-                <div className="text-center">
-                  <p className="font-body text-lg text-chocolate/70">
-                    What digit is in the <span className="font-bold text-coral">{quiz.place}</span> place?
-                  </p>
-                  <div className="mt-4">
-                    <PlaceValueDisplay number={quiz.number} size="lg" showLabels={false} />
-                  </div>
-                </div>
-
-                {/* Answer Options */}
-                <div className="flex flex-wrap justify-center gap-3">
-                  {quiz.options.map((option, i) => (
-                    <button
+                {/* Score - visual dots */}
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: score.total }).map((_, i) => (
+                    <div
                       key={i}
-                      onClick={() => handleAnswerSelect(option)}
-                      disabled={isCorrect !== null}
-                      className={`
-                        flex h-16 w-16 items-center justify-center rounded-xl
-                        font-display text-2xl font-bold transition-all duration-200
-                        ${
-                          selectedAnswer === option
-                            ? isCorrect
-                              ? 'bg-sage text-cream'
-                              : 'bg-coral text-cream'
-                            : isCorrect !== null && option === quiz.answer
-                              ? 'bg-sage text-cream'
-                              : 'bg-cream text-chocolate hover:bg-yellow/20'
-                        }
-                        disabled:cursor-not-allowed
-                      `}
-                    >
-                      {option}
-                    </button>
+                      className={`h-3 w-3 rounded-full ${
+                        i < score.correct ? 'bg-sage' : 'bg-coral/50'
+                      }`}
+                    />
                   ))}
+                  {score.total === 0 && (
+                    <div className="h-3 w-12 rounded-full bg-chocolate/10" />
+                  )}
                 </div>
 
-                {/* Feedback */}
-                <AnswerFeedback isCorrect={isCorrect} correctAnswer={quiz.answer} />
+                {/* Visual question indicator - highlight the place being asked */}
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-16 w-16 items-center justify-center rounded-full ${placeBgColors[quiz.place]} text-cream animate-pulse`}>
+                    <StepIcon type={quiz.place === 'thousands' ? 'thousands' : quiz.place === 'hundreds' ? 'hundreds' : quiz.place === 'tens' ? 'tens' : 'ones'} size="lg" />
+                  </div>
+                  <span className="font-display text-3xl text-chocolate/40">?</span>
+                </div>
 
-                {/* Next Button */}
+                {/* Number display - only highlight place AFTER answering */}
+                <div className="mt-2">
+                  <PlaceValueDisplay
+                    number={quiz.number}
+                    size="lg"
+                    showLabels={false}
+                    highlightPlace={isCorrect !== null ? quiz.place : undefined}
+                  />
+                </div>
+
+                {/* Answer Options - large touch targets, track by index */}
+                <div className="flex flex-wrap justify-center gap-4">
+                  {quiz.options.map((option, i) => {
+                    const isSelected = selectedIndex === i;
+                    const isCorrectAnswer = option === quiz.answer;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => handleAnswerSelect(i, option)}
+                        disabled={isCorrect !== null}
+                        className={`
+                          flex h-20 w-20 items-center justify-center rounded-2xl
+                          font-display text-3xl font-bold transition-all duration-200
+                          ${
+                            isSelected
+                              ? isCorrect
+                                ? 'bg-sage text-cream scale-110'
+                                : 'bg-coral text-cream animate-shake'
+                              : isCorrect !== null && isCorrectAnswer
+                                ? 'bg-sage text-cream scale-110'
+                                : 'bg-cream text-chocolate shadow-soft hover:scale-105 hover:shadow-md'
+                          }
+                          disabled:cursor-not-allowed
+                        `}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Feedback - icon only, audio handles the rest */}
+                <AnswerFeedback isCorrect={isCorrect} showText={false} />
+
+                {/* Next Button - arrow icon */}
                 {isCorrect !== null && (
-                  <Button onClick={nextQuestion}>Next Question</Button>
+                  <Button onClick={nextQuestion} size="lg" aria-label="Next question">
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </Button>
                 )}
               </div>
             )}
