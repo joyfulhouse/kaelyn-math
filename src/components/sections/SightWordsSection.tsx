@@ -321,10 +321,10 @@ export function SightWordsSection() {
                     onClick={() => speak(quiz.word)}
                     className="mx-auto flex items-center gap-2 rounded-full bg-sage/10 px-6 py-3 text-sage transition-all hover:bg-sage/20"
                   >
-                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                    <svg className="h-8 w-8" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
                     </svg>
-                    <span className="font-display text-xl font-bold">{quiz.word}</span>
+                    <span className="text-sm">Tap to hear</span>
                   </button>
                 </div>
 
